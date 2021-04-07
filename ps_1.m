@@ -3,9 +3,6 @@
 
 clear;clc;close all;
 
-visorsModel;
-% f_body, v_body, f_panel, v_panel_1, v_panel_2
-
 %% 1-6) 
 %{
     Develop a Matlab/Simulink function to handle barycenter coordinates, 
@@ -13,48 +10,18 @@ visorsModel;
     in the body frame.
 %}
 
-n_body = size(f_body,1);
-n_panel = size(f_panel,1);
+visorsModel;
+% f_bus, v_bus, f_pan, v_pan_1, v_pan_2
 
-% main body
-c_body = zeros(n_body,3);
-a_body = zeros(n_body,1);
-u_body = zeros(n_body,3);
-for i = 1:n_body
-    verts = v_body(f_body(i,:)',:);
-    c_body(i,:) = mean(verts,1);
-    a_body(i) = getArea(verts);
-    u_body(i,:) = getNormal(verts);
-end
-
-% manually adjust  unit vec signs
-u_body([1,3,6],:) = -u_body([1,3,6],:);
-
-% solar panels
-c_panel_1 = zeros(n_panel,3);
-a_panel_1 = zeros(n_panel,1);
-c_panel_2 = zeros(n_panel,3);
-a_panel_2 = zeros(n_panel,1);
-for i = 1:n_panel
-    verts = v_panel_1(f_panel(i,:)',:);
-    c_panel_1(i,:) = mean(verts,1);
-    a_panel_1(i) = getArea(verts);
-    verts = v_panel_2(f_panel(i,:)',:);
-    c_panel_2(i,:) = mean(verts,1);
-    a_panel_2(i) = getArea(verts);
-end
-
-% panels are a rotation of body
-u_panel = (R3(pi/4)*u_body')';
-u_panel_1 = (R3(pi)*u_panel')';
-
+[com_bus,c_bus,a_bus,u_bus] = spacecraftGeom(f_bus,v_bus);
+[com_pan_1,c_pan_1,a_pan_1,u_pan_1] = spacecraftGeom(f_pan,v_pan_1);
+[com_pan_2,c_pan_2,a_pan_2,u_pan_2] = spacecraftGeom(f_pan,v_pan_2);
 
 %% 1-7) Plot the body axis
 %{
     Plot the body axis (triad) superimposed on the spacecraft 3D model
 %}
 
-%{
 figure(); hold on
     
     % triad 
@@ -63,9 +30,49 @@ figure(); hold on
     quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;0;0],[0;0;30],'c')
     
     % 3D model
-    patch('Faces',f_body,'Vertices',v_body,'FaceColor',[0.5,0.5,0.5])
-    patch('Faces',f_panel,'Vertices',v_panel_1,'FaceColor','blue')
-    patch('Faces',f_panel,'Vertices',v_panel_2,'FaceColor','blue')
+    patch('Faces',f_bus,'Vertices',v_bus,'FaceColor',[0.5,0.5,0.5])
+    
+    xlabel('X (cm)')
+    ylabel('Y (cm)')
+    zlabel('Z (cm)')
+    view(37.5+90,30)
+    axis equal
+    
+hold off
+
+figure(); hold on
+    
+    % triad 
+    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[10;0;0],[0;0;0],[0;0;0],'r')
+    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;10;0],[0;0;0],'g')
+    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;0;0],[0;0;10],'c')
+    
+    % 3D model
+    patch('Faces',f_bus,'Vertices',v_pan_cen,'FaceColor','blue')
+    
+    xlabel('X (cm)')
+    ylabel('Y (cm)')
+    zlabel('Z (cm)')
+    view(37.5+90,30)
+    axis equal
+    
+hold off
+
+
+% {
+figure(); hold on
+    
+    % triad 
+    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[30;0;0],[0;0;0],[0;0;0],'r')
+    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;30;0],[0;0;0],'g')
+    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;0;0],[0;0;30],'c')
+    
+    % 3D model
+    patch('Faces',f_bus,'Vertices',v_bus,'FaceColor',[0.5,0.5,0.5])
+    patch('Faces',f_pan,'Vertices',v_pan_1,'FaceColor','blue')
+    patch('Faces',f_pan,'Vertices',v_pan_2,'FaceColor','blue')
+    plot3(com_pan_1(1),com_pan_1(2),com_pan_1(3),'r*')
+    plot3(com_pan_2(1),com_pan_2(2),com_pan_2(3),'g*')
     
     xlabel('X (cm)')
     ylabel('Y (cm)')
@@ -80,34 +87,38 @@ hold off
  
 visorsOrbit
 
+% ECI propagation
 [r,v] = ConvOEtoRV(oe,mu);
 opts = odeset('abstol', 1e-3, 'reltol', 1e-3);
-[t_array,rv_array] = ode45(@FODEint,0:(2*60):(2*T),[r;v],opts);
-% % opts = odeset('abstol', 1e-6, 'reltol', 1e-6);
-% [t_array,rv_array] = ode45(@FODEint,linspace(0,2*T,100)',[r;v]);
+[t_array,rv_array] = ode113(@FODEint,0:30:(2*T),[r;v],opts);
+
+% ECEF
+JD_array = t_array./86400 + JD_epoch;
+r_ECEF = zeros(size(rv_array,1),3);
+for i = 1:numel(JD_array)
+    R_ECItoECEF = rotECItoECEF(JD2GMST(JD_array(i)));
+    r_ECEF(i,1:3) = (R_ECItoECEF*rv_array(i,1:3)')';
+end
+
 
 figure(); hold on
+subplot(1,2,1); hold on
     plot3(rv_array(:,1),rv_array(:,2),rv_array(:,3),'r')
-    earth_sphere('m')
+    [X,Y,Z] = sphere;
+    surf(X.*s3_constants('R_EARTH'),Y.*s3_constants('R_EARTH'),Z.*s3_constants('R_EARTH'),'FaceColor','blue')
+    xlabel('ECI X (m)')
+    ylabel('ECI Y (m)')
+    zlabel('ECI Z (m)')
+    view(37.5+90,30)
     axis equal
     hold off
+subplot(1,2,2); hold on
+    plot3(r_ECEF(:,1),r_ECEF(:,2),r_ECEF(:,3),'r')
+    earth_sphere('m')
+    xlabel('ECEF X (m)')
+    ylabel('ECEF Y (m)')
+    zlabel('ECEF Z (m)')
+    axis equal
+    hold off
+hold off
     
-
-%% Functions
- 
-function U = getNormal(verts)
-    v1 = verts(2,:) - verts(1,:);
-    v2 = verts(4,:) - verts(1,:);
-    U = unitVec(cross(v1,v2))'; 
-end
-
-function A = getArea(verts)
-    d1 = norm(verts(1,:)-verts(2,:));
-    d2 = norm(verts(1,:)-verts(4,:));
-    d3 = norm(verts(1,:)-verts(4,:));
-    if d1 == d2
-        A = d1 * d3;
-    else
-        A = d1 * d2;
-    end
-end
