@@ -21,7 +21,7 @@ end
 
 function A = getArea(verts)
     d1 = norm(verts(1,:)-verts(2,:));
-    d2 = norm(verts(1,:)-verts(4,:));
+    d2 = norm(verts(1,:)-verts(3,:));
     d3 = norm(verts(1,:)-verts(4,:));
     if d1 == d2
         A = d1 * d3;
