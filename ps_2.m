@@ -33,26 +33,25 @@ triad_prin = A_rot*triad_body;
 figure(); hold on
     
     % triad 
-    quiver3(0,0,0,triad_prin(1,1),triad_prin(2,1),triad_prin(3,1),'r--')
-    quiver3(0,0,0,triad_prin(1,2),triad_prin(2,2),triad_prin(3,2),'g--')
-    quiver3(0,0,0,triad_prin(1,3),triad_prin(2,3),triad_prin(3,3),'c--')
+    quiver3(0,0,0,triad_prin(1,1),triad_prin(2,1),triad_prin(3,1),'r--','DisplayName','X-Principle')
+    quiver3(0,0,0,triad_prin(1,2),triad_prin(2,2),triad_prin(3,2),'g--','DisplayName','Y-Principle')
+    quiver3(0,0,0,triad_prin(1,3),triad_prin(2,3),triad_prin(3,3),'c--','DisplayName','Z-Principle')
     
-    quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),'r')
-    quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),'g')
-    quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),'c')
+    quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),'r','DisplayName','X-Body')
+    quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),'g','DisplayName','Y-Body')
+    quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),'c','DisplayName','Z-Body')
     
     % 3D model
-    patch('Faces',f_bus,'Vertices',v_bus,'FaceColor',[0.5,0.5,0.5],'FaceAlpha',0.75)
-    patch('Faces',f_pan,'Vertices',v_pan_1,'FaceColor','blue','FaceAlpha',0.75)
-    patch('Faces',f_pan,'Vertices',v_pan_2,'FaceColor','blue','FaceAlpha',0.75)
+    patch('Faces',f_bus,'Vertices',v_bus,'FaceColor',[0.5,0.5,0.5],'FaceAlpha',0.75,'DisplayName','Main Bus')
+    patch('Faces',f_pan,'Vertices',v_pan_1,'FaceColor','blue','FaceAlpha',0.75,'DisplayName','Panel')
+    patch('Faces',f_pan,'Vertices',v_pan_2,'FaceColor','blue','FaceAlpha',0.75,'DisplayName','Panel')
     
     xlabel('X (cm)')
     ylabel('Y (cm)')
     zlabel('Z (cm)')
     view(80+90,50)
     axis equal
-    
-    legend('X-Prin','Y-Prin','Z-Prin','X-Body','Y-Body','Z-Body')
+    legend()
     
 hold off
 
