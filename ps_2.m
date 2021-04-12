@@ -5,9 +5,9 @@ clear all; close all; clc;
 
 %% 2-1)
 %{
-    In general the body axes are not the principal axes. Identify principal axes through the
-    eigenvector/eigenvalue problem discussed in class and compute the rotation matrix from body to principal
-    axes.
+    In general the body axes are not the principal axes. Identify principal
+    axes through the eigenvector/eigenvalue problem discussed in class and
+    compute the rotation matrix from body to principal axes.
 %}
 
 I_body = [+0.20502, -0.10457, +0.00000; ...
@@ -15,10 +15,29 @@ I_body = [+0.20502, -0.10457, +0.00000; ...
           +0.00000, +0.00000, +0.25733];
 [A_rot, I_princ] = eig(I_body);
 
+%% 2-2) 
+%{
+    At this stage you should have a simple 3D model of your spacecraft
+    including geometry and mass properties of each element. This includes
+    at least two coordinate systems, body and principal axes respectively,
+    and the direction cosine matrix between them. Plot axes of triads in 3D
+    superimposed to spacecraft 3D model.
+%}
+
+% TODO
+
+%% 2-3)
+%{
+    Program Euler equations in principal axes (e.g. in Matlab/Simulink). No
+    external torques.
+%}
+
+% TODO
+
 %% 2-4)
 %{
-    Numerically integrate Euler equations from arbitrary initial conditions (ω<10°/s, ωi≠0). Multiple attitude
-    revolutions
+    Numerically integrate Euler equations from arbitrary initial conditions
+    (ω<10°/s, ωi≠0). Multiple attitude revolutions
 %}
 
 % Renaming variables
@@ -37,10 +56,12 @@ options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9);
 
 %% 2-5 and 2-6)
 %{
-    Plot rotational kinetic energy and momentum ellipsoids in 3D (axis equal) corresponding to chosen initial
-    conditions. Verify that semi-axis of ellipsoids corresponds to theoretical values.
+    5. Plot rotational kinetic energy and momentum ellipsoids in 3D (axis
+    equal) corresponding to chosen initial conditions. Verify that
+    semi-axis of ellipsoids corresponds to theoretical values.
 
-    Plot polhode in same 3D plot. Verify that it is the intersection between the ellipsoids.
+    6. Plot polhode in same 3D plot. Verify that it is the intersection
+    between the ellipsoids.
 %}
 
 T = ((wx_i^2 * Ix) + (wy_i^2 * Iy) + (wz_i^2 * Iz)) / 2;
@@ -62,8 +83,9 @@ view(3);
 
 %% 2-7)
 %{
-    Plot polhode in three 2D planes identified by principal axes (axis equal). Verify that shapes of resulting
-    conic sections correspond to theory.
+    Plot polhode in three 2D planes identified by principal axes (axis
+    equal). Verify that shapes of resulting conic sections correspond to
+    theory.
 %}
 
 figure();
@@ -117,3 +139,38 @@ ydot(1) = (Mx - (Iz - Iy) * wy * wz) / Ix;
 ydot(2) = (My - (Ix - Iz) * wz * wx) / Iy;
 ydot(3) = (Mz - (Iy - Ix) * wx * wy) / Iz;
 end
+
+%% 2-8)
+%{
+    Repeat above steps changing initial conditions, e.g. setting angular
+    velocity vector parallel to principal axis. Is the behavior according
+    to expectations?
+%}
+
+%TODO
+
+%% 2-9)
+%{
+    Impose that satellite is axial-symmetric (Ix=Iy≠Iz). Repeat numerical
+    simulation using initial condition 4).
+%}
+
+%TODO
+
+%% 2-10) 
+%{
+    Program analytical solution for axial-symmetric satellite. Compute it
+    at same time steps and from same initial conditions as 9).
+%}
+
+%TODO
+
+%% 2-11) 
+%{
+    Compare numerical and analytical solutions. Plot differences (errors),
+    do not only superimpose absolute values. Tune numerical integrator for
+    large discrepancies. Are angular velocity vector and angular momentum
+    vector changing according to theory in principal axes?
+%}
+
+%TODO
