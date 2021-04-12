@@ -74,7 +74,7 @@ hold off
 Ix = I_princ(1,1); Iy = I_princ(2,2); Iz = I_princ(3,3);
 
 % Initial Conditions
-wx_i = deg2rad(3); wy_i = deg2rad(2); wz_i = deg2rad(1);
+wx_i = deg2rad(-3); wy_i = deg2rad(2); wz_i = deg2rad(1);
 y0 = [wx_i; wy_i; wz_i];
 
 % Sim time parameters
@@ -104,11 +104,11 @@ a_moment = L/Ix; b_moment = L/Iy; c_moment = L/Iz;
 [Xm, Ym, Zm] = ellipsoid(0,0,0,a_moment,b_moment,c_moment);
 
 figure(); hold on; grid on; axis equal;
-surf(Xe,Ye,Ze, 'FaceColor', 'blue');
-surf(Xm,Ym,Zm, 'FaceColor', 'green');
-plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4);
+surf(Xe,Ye,Ze, 'FaceColor', 'blue', 'DisplayName', 'Energy Ellipsoid');
+surf(Xm,Ym,Zm, 'FaceColor', 'green', 'DisplayName', 'Momentum Ellipsoid');
+plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4, 'DisplayName', 'Polhode');
 xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)'); zlabel('c_z (rad/s)');
-title('Polhode and Energy/Momentum Ellipsoids');
+title('Polhode and Energy/Momentum Ellipsoids'); legend();
 view(3);
 
 %% 2-7)
