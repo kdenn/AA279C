@@ -73,15 +73,15 @@ hold off
 Ix = I_princ(1,1); Iy = I_princ(2,2); Iz = I_princ(3,3);
 
 % Initial Conditions
-wx_i = deg2rad(-3); wy_i = deg2rad(2); wz_i = deg2rad(1);
-y0 = [wx_i; wy_i; wz_i];
+w0 = deg2rad([-3;2;1]);
+norm(rad2deg(w0))
 
 % Sim time parameters
-t0 = 0; dt = 0.1; tf = 200; t_sim = [t0:dt:tf]';
+t0 = 0; dt = 0.1; tf = 300; t_sim = [t0:dt:tf]';
 
 % Call numerical integrator
 options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9);
-[t_out, y_out] = ode45(@(t,y) int_Euler_eqs(t,y,I_princ), t_sim, y0, options);
+[t_out, y_out] = ode45(@(t,y) int_Euler_eqs(t,y,I_princ), t_sim, w0, options);
 
 %% 2-5 and 2-6)
 %{
@@ -93,8 +93,8 @@ options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9);
     between the ellipsoids.
 %}
 
-T = ((wx_i^2 * Ix) + (wy_i^2 * Iy) + (wz_i^2 * Iz)) / 2;
-L = sqrt((wx_i^2 * Ix^2) + (wy_i^2 * Iy^2) + (wz_i^2 * Iz^2));
+T = ((w0(1)^2 * Ix) + (w0(2)^2 * Iy) + (w0(3)^2 * Iz)) / 2
+L = sqrt((w0(1)^2 * Ix^2) + (w0(2)^2 * Iy^2) + (w0(3)^2 * Iz^2))
 
 a_energy = sqrt(2*T/Ix); b_energy = sqrt(2*T/Iy); c_energy = sqrt(2*T/Iz);
 a_moment = L/Ix; b_moment = L/Iy; c_moment = L/Iz;
@@ -102,13 +102,46 @@ a_moment = L/Ix; b_moment = L/Iy; c_moment = L/Iz;
 [Xe, Ye, Ze] = ellipsoid(0,0,0,a_energy,b_energy,c_energy);
 [Xm, Ym, Zm] = ellipsoid(0,0,0,a_moment,b_moment,c_moment);
 
-figure(); hold on; grid on; axis equal;
-surf(Xe,Ye,Ze, 'FaceColor', 'blue', 'DisplayName', 'Energy Ellipsoid');
-surf(Xm,Ym,Zm, 'FaceColor', 'green', 'DisplayName', 'Momentum Ellipsoid');
-plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4, 'DisplayName', 'Polhode');
-xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)'); zlabel('c_z (rad/s)');
-title('Polhode and Energy/Momentum Ellipsoids'); legend();
-view(3);
+figure(); 
+
+    hold on; grid on; axis equal;
+    surf(Xe,Ye,Ze, 'FaceColor', 'blue', 'DisplayName', 'Energy Ellipsoid');
+    surf(Xm,Ym,Zm, 'FaceColor', 'green', 'DisplayName', 'Momentum Ellipsoid');
+    plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4, 'DisplayName', 'Polhode');
+    xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)'); zlabel('c_z (rad/s)');
+    title('Polhode and Energy/Momentum Ellipsoids'); legend();
+    view(3);
+    
+figure();
+    
+    % xy plane
+    subplot(1,3,1); hold on; grid on; axis equal;
+    surf(Xe,Ye,Ze, 'FaceColor', 'blue', 'DisplayName', 'Energy Ellipsoid');
+    surf(Xm,Ym,Zm, 'FaceColor', 'green', 'DisplayName', 'Momentum Ellipsoid');
+    plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4, 'DisplayName', 'Polhode');
+    xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)'); zlabel('c_z (rad/s)');
+    title('Polhode and Energy/Momentum Ellipsoids in XY'); legend();
+    view([0,0,1]);
+    
+    % xz plane
+    subplot(1,3,2); hold on; grid on; axis equal;
+    surf(Xe,Ye,Ze, 'FaceColor', 'blue', 'DisplayName', 'Energy Ellipsoid');
+    surf(Xm,Ym,Zm, 'FaceColor', 'green', 'DisplayName', 'Momentum Ellipsoid');
+    plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4, 'DisplayName', 'Polhode');
+    xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)'); zlabel('c_z (rad/s)');
+    title('Polhode and Energy/Momentum Ellipsoids in XZ'); legend();
+    view([0,-1,0]);
+    
+    % yz plane
+    subplot(1,3,3); hold on; grid on; axis equal;
+    surf(Xe,Ye,Ze, 'FaceColor', 'blue', 'DisplayName', 'Energy Ellipsoid');
+    surf(Xm,Ym,Zm, 'FaceColor', 'green', 'DisplayName', 'Momentum Ellipsoid');
+    plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4, 'DisplayName', 'Polhode');
+    xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)'); zlabel('c_z (rad/s)');
+    title('Polhode and Energy/Momentum Ellipsoids in YZ'); legend();
+    view([1,0,0]);
+    
+
 
 %% 2-7)
 %{
