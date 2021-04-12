@@ -152,39 +152,39 @@ figure();
 
 figure();
 
-% xy plane
-subplot(1,3,1); hold on; grid on; axis equal; 
-plot(y_out(:,1), y_out(:,2), 'LineWidth', 3); 
-xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)');
-title('Polhode in XY Plane');
-a = sqrt( (L^2-2*T*Iz) / ((Ix-Iz)*Ix) );
-b = sqrt( (L^2-2*T*Iz) / ((Iy-Iz)*Iy) );
-t = linspace(0,2*pi); x = a*cos(t); y = b*sin(t);
-plot(x,y, 'r-.');
+    % xy plane
+    subplot(1,3,1); hold on; grid on; axis equal; 
+    plot(y_out(:,1), y_out(:,2), 'LineWidth', 3); 
+    xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)');
+    title('Polhode in XY Plane');
+    a = sqrt( (L^2-2*T*Iz) / ((Ix-Iz)*Ix) );
+    b = sqrt( (L^2-2*T*Iz) / ((Iy-Iz)*Iy) );
+    t = linspace(0,2*pi); x = a*cos(t); y = b*sin(t);
+    plot(x,y, 'r-.');
 
-% xz plane
-subplot(1,3,2); hold on; grid on; axis equal;
-plot(y_out(:,1), y_out(:,3), 'LineWidth', 3); 
-xlabel('c_x (rad/s)'); ylabel('c_z (rad/s)');
-title('Polhode in XZ Plane');
-a = - sqrt( (L^2-2*T*Iy) / ((Ix-Iy)*Ix) );
-b = sqrt( -(L^2-2*T*Iy) / ((Iz-Iy)*Iz) );
-e = sqrt(1 + (b^2/abs(a^2)));
-x = linspace(a, 2*a, 100);
-ytop = b.*sqrt(x.^2 ./ a.^2 - 1);
-ybot = -b.*sqrt(x.^2 ./ a.^2 - 1);
-plot(x, ytop, 'r-.', x, ybot, 'r-.', -x, ytop, 'r-.', -x, ybot, 'r-.');
+    % xz plane
+    subplot(1,3,2); hold on; grid on; axis equal;
+    plot(y_out(:,1), y_out(:,3), 'LineWidth', 3); 
+    xlabel('c_x (rad/s)'); ylabel('c_z (rad/s)');
+    title('Polhode in XZ Plane');
+    a = - sqrt( (L^2-2*T*Iy) / ((Ix-Iy)*Ix) );
+    b = sqrt( -(L^2-2*T*Iy) / ((Iz-Iy)*Iz) );
+    e = sqrt(1 + (b^2/abs(a^2)));
+    x = linspace(a, 2*a, 100);
+    ytop = b.*sqrt(x.^2 ./ a.^2 - 1);
+    ybot = -b.*sqrt(x.^2 ./ a.^2 - 1);
+    plot(x, ytop, 'r-.', x, ybot, 'r-.', -x, ytop, 'r-.', -x, ybot, 'r-.');
 
-% yz plane
-subplot(1,3,3); hold on; grid on; axis equal;
-plot(y_out(:,2), y_out(:,3), 'LineWidth', 3); 
-xlabel('c_y (rad/s)'); ylabel('c_z (rad/s)');
-title('Polhode in YZ Plane');
-a = sqrt( (L^2-2*T*Ix) / ((Iy-Ix)*Iy) );
-b = sqrt( (L^2-2*T*Ix) / ((Iz-Ix)*Iz) );
-t = linspace(0,2*pi); x = a*cos(t); y = b*sin(t);
-plot(x,y, 'r-.');
-legend('Numerical', 'Analytical');
+    % yz plane
+    subplot(1,3,3); hold on; grid on; axis equal;
+    plot(y_out(:,2), y_out(:,3), 'LineWidth', 3); 
+    xlabel('c_y (rad/s)'); ylabel('c_z (rad/s)');
+    title('Polhode in YZ Plane');
+    a = sqrt( (L^2-2*T*Ix) / ((Iy-Ix)*Iy) );
+    b = sqrt( (L^2-2*T*Ix) / ((Iz-Ix)*Iz) );
+    t = linspace(0,2*pi); x = a*cos(t); y = b*sin(t);
+    plot(x,y, 'r-.');
+    legend('Numerical', 'Analytical');
 
 %% 2-8)
 %{
@@ -193,7 +193,98 @@ legend('Numerical', 'Analytical');
     to expectations?
 %}
 
-%TODO
+% Initial Conditions
+w0 = A_rot*deg2rad([3;3;3]);
+norm(rad2deg(w0))
+
+% Call numerical integrator
+[t_out, y_out] = ode45(@(t,y) int_Euler_eqs(t,y,I_princ), t_sim, w0, options);
+
+% Plot the Polhode
+T = ((w0(1)^2 * Ix) + (w0(2)^2 * Iy) + (w0(3)^2 * Iz)) / 2
+L = sqrt((w0(1)^2 * Ix^2) + (w0(2)^2 * Iy^2) + (w0(3)^2 * Iz^2))
+
+a_energy = sqrt(2*T/Ix); b_energy = sqrt(2*T/Iy); c_energy = sqrt(2*T/Iz);
+a_moment = L/Ix; b_moment = L/Iy; c_moment = L/Iz;
+
+[Xe, Ye, Ze] = ellipsoid(0,0,0,a_energy,b_energy,c_energy);
+[Xm, Ym, Zm] = ellipsoid(0,0,0,a_moment,b_moment,c_moment);
+
+figure(); 
+    
+    hold on; grid on; axis equal;
+    surf(Xe,Ye,Ze, 'FaceColor', 'blue', 'DisplayName', 'Energy Ellipsoid');
+    surf(Xm,Ym,Zm, 'FaceColor', 'green', 'DisplayName', 'Momentum Ellipsoid');
+    plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4, 'DisplayName', 'Polhode');
+    xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)'); zlabel('c_z (rad/s)');
+    title('Polhode and Energy/Momentum Ellipsoids'); legend();
+    view(3);
+    
+figure();
+    
+    % xy plane
+    subplot(1,3,1); hold on; grid on; axis equal;
+    surf(Xe,Ye,Ze, 'FaceColor', 'blue', 'DisplayName', 'Energy Ellipsoid');
+    surf(Xm,Ym,Zm, 'FaceColor', 'green', 'DisplayName', 'Momentum Ellipsoid');
+    plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4, 'DisplayName', 'Polhode');
+    xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)'); zlabel('c_z (rad/s)');
+    title('Polhode and Energy/Momentum Ellipsoids in XY'); legend();
+    view([0,0,1]);
+    
+    % xz plane
+    subplot(1,3,2); hold on; grid on; axis equal;
+    surf(Xe,Ye,Ze, 'FaceColor', 'blue', 'DisplayName', 'Energy Ellipsoid');
+    surf(Xm,Ym,Zm, 'FaceColor', 'green', 'DisplayName', 'Momentum Ellipsoid');
+    plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4, 'DisplayName', 'Polhode');
+    xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)'); zlabel('c_z (rad/s)');
+    title('Polhode and Energy/Momentum Ellipsoids in XZ'); legend();
+    view([0,-1,0]);
+    
+    % yz plane
+    subplot(1,3,3); hold on; grid on; axis equal;
+    surf(Xe,Ye,Ze, 'FaceColor', 'blue', 'DisplayName', 'Energy Ellipsoid');
+    surf(Xm,Ym,Zm, 'FaceColor', 'green', 'DisplayName', 'Momentum Ellipsoid');
+    plot3(y_out(:,1), y_out(:,2), y_out(:,3), 'r', 'LineWidth', 4, 'DisplayName', 'Polhode');
+    xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)'); zlabel('c_z (rad/s)');
+    title('Polhode and Energy/Momentum Ellipsoids in YZ'); legend();
+    view([1,0,0]);
+
+figure();
+
+    % xy plane
+    subplot(1,3,1); hold on; grid on; axis equal; 
+    plot(y_out(:,1), y_out(:,2), 'LineWidth', 3); 
+    xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)');
+    title('Polhode in XY Plane');
+    a = sqrt( (L^2-2*T*Iz) / ((Ix-Iz)*Ix) );
+    b = sqrt( (L^2-2*T*Iz) / ((Iy-Iz)*Iy) );
+    t = linspace(0,2*pi); x = a*cos(t); y = b*sin(t);
+    plot(x,y, 'r-.');
+
+    % xz plane
+    subplot(1,3,2); hold on; grid on; axis equal;
+    plot(y_out(:,1), y_out(:,3), 'LineWidth', 3); 
+    xlabel('c_x (rad/s)'); ylabel('c_z (rad/s)');
+    title('Polhode in XZ Plane');
+    a = - sqrt( (L^2-2*T*Iy) / ((Ix-Iy)*Ix) );
+    b = sqrt( -(L^2-2*T*Iy) / ((Iz-Iy)*Iz) );
+    e = sqrt(1 + (b^2/abs(a^2)));
+    x = linspace(a, 2*a, 100);
+    ytop = b.*sqrt(x.^2 ./ a.^2 - 1);
+    ybot = -b.*sqrt(x.^2 ./ a.^2 - 1);
+    plot(x, ytop, 'r-.', x, ybot, 'r-.', -x, ytop, 'r-.', -x, ybot, 'r-.');
+
+    % yz plane
+    subplot(1,3,3); hold on; grid on; axis equal;
+    plot(y_out(:,2), y_out(:,3), 'LineWidth', 3); 
+    xlabel('c_y (rad/s)'); ylabel('c_z (rad/s)');
+    title('Polhode in YZ Plane');
+    a = sqrt( (L^2-2*T*Ix) / ((Iy-Ix)*Iy) );
+    b = sqrt( (L^2-2*T*Ix) / ((Iz-Ix)*Iz) );
+    t = linspace(0,2*pi); x = a*cos(t); y = b*sin(t);
+    plot(x,y, 'r-.');
+    legend('Numerical', 'Analytical');
+
 
 %% 2-9)
 %{
