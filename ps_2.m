@@ -52,6 +52,8 @@ figure(); hold on
     view(80+90,50)
     axis equal
     
+    legend('X-Prin','Y-Prin','Z-Prin','X-Body','Y-Body','Z-Body')
+    
 hold off
 
 %% 2-3)
