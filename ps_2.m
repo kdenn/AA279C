@@ -67,18 +67,40 @@ view(3);
 %}
 
 figure();
+
+% xy plane
 subplot(1,3,1); hold on; grid on; axis equal; 
-plot(y_out(:,1), y_out(:,2)); % xy plane
-xlabel('X (rad/s)'); ylabel('Y (rad/s)');
+plot(y_out(:,1), y_out(:,2), 'LineWidth', 3); 
+xlabel('c_x (rad/s)'); ylabel('c_y (rad/s)');
+title('Polhode in XY Plane');
+a = sqrt( (L^2-2*T*Iz) / ((Ix-Iz)*Ix) );
+b = sqrt( (L^2-2*T*Iz) / ((Iy-Iz)*Iy) );
+t = linspace(0,2*pi); x = a*cos(t); y = b*sin(t);
+plot(x,y, 'r-.');
 
+% xz plane
 subplot(1,3,2); hold on; grid on; axis equal;
-plot(y_out(:,1), y_out(:,3)); % xz plane
-xlabel('X (rad/s)'); ylabel('Z (rad/s)');
+plot(y_out(:,1), y_out(:,3), 'LineWidth', 3); 
+xlabel('c_x (rad/s)'); ylabel('c_z (rad/s)');
+title('Polhode in XZ Plane');
+a = - sqrt( (L^2-2*T*Iy) / ((Ix-Iy)*Ix) );
+b = sqrt( -(L^2-2*T*Iy) / ((Iz-Iy)*Iz) );
+e = sqrt(1 + (b^2/abs(a^2)));
+x = linspace(a, 2*a, 100);
+ytop = b.*sqrt(x.^2 ./ a.^2 - 1);
+ybot = -b.*sqrt(x.^2 ./ a.^2 - 1);
+plot(x, ytop, 'r-.', x, ybot, 'r-.', -x, ytop, 'r-.', -x, ybot, 'r-.');
 
+% yz plane
 subplot(1,3,3); hold on; grid on; axis equal;
-plot(y_out(:,2), y_out(:,3)); % yz plane
-xlabel('Y (rad/s)'); ylabel('Z (rad/s)');
-
+plot(y_out(:,2), y_out(:,3), 'LineWidth', 3); 
+xlabel('c_y (rad/s)'); ylabel('c_z (rad/s)');
+title('Polhode in YZ Plane');
+a = sqrt( (L^2-2*T*Ix) / ((Iy-Ix)*Iy) );
+b = sqrt( (L^2-2*T*Ix) / ((Iz-Ix)*Iz) );
+t = linspace(0,2*pi); x = a*cos(t); y = b*sin(t);
+plot(x,y, 'r-.');
+legend('Numerical', 'Analytical');
 
 
 % Numerical integration of Euler's equations
