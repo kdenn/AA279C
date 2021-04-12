@@ -24,7 +24,35 @@ I_body = [+0.20502, -0.10457, +0.00000; ...
     superimposed to spacecraft 3D model.
 %}
 
-% TODO
+visorsModel;
+% f_bus, v_bus, f_pan, v_pan_1, v_pan_2
+
+triad_body = 30.*eye(3);
+triad_prin = A_rot*triad_body;
+
+figure(); hold on
+    
+    % triad 
+    quiver3(0,0,0,triad_prin(1,1),triad_prin(2,1),triad_prin(3,1),'r--')
+    quiver3(0,0,0,triad_prin(1,2),triad_prin(2,2),triad_prin(3,2),'g--')
+    quiver3(0,0,0,triad_prin(1,3),triad_prin(2,3),triad_prin(3,3),'c--')
+    
+    quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),'r')
+    quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),'g')
+    quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),'c')
+    
+    % 3D model
+    patch('Faces',f_bus,'Vertices',v_bus,'FaceColor',[0.5,0.5,0.5],'FaceAlpha',0.75)
+    patch('Faces',f_pan,'Vertices',v_pan_1,'FaceColor','blue','FaceAlpha',0.75)
+    patch('Faces',f_pan,'Vertices',v_pan_2,'FaceColor','blue','FaceAlpha',0.75)
+    
+    xlabel('X (cm)')
+    ylabel('Y (cm)')
+    zlabel('Z (cm)')
+    view(80+90,50)
+    axis equal
+    
+hold off
 
 %% 2-3)
 %{
