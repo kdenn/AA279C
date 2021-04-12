@@ -44,7 +44,7 @@ I_body = [+0.20502, -0.10457, +0.00000; ...
 Ix = I_princ(1,1); Iy = I_princ(2,2); Iz = I_princ(3,3);
 
 % Initial Conditions
-wx_i = deg2rad(3); wy_i = deg2rad(2); wz_i = deg2rad(1);
+wx_i = deg2rad(-3); wy_i = deg2rad(2); wz_i = deg2rad(1);
 y0 = [wx_i; wy_i; wz_i];
 
 % Sim time parameters
