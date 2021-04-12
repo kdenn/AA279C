@@ -22,12 +22,14 @@ visorsModel;
     Plot the body axis (triad) superimposed on the spacecraft 3D model
 %}
 
+triad_body = 30.*eye(3);
+
 figure(); hold on
     
     % triad 
-    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[30;0;0],[0;0;0],[0;0;0],'r')
-    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;30;0],[0;0;0],'g')
-    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;0;0],[0;0;30],'c')
+    quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),'r')
+    quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),'g')
+    quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),'c')
     
     % 3D model
     patch('Faces',f_bus,'Vertices',v_bus,'FaceColor',[0.5,0.5,0.5])
@@ -43,9 +45,9 @@ hold off
 figure(); hold on
     
     % triad 
-    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[10;0;0],[0;0;0],[0;0;0],'r')
-    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;10;0],[0;0;0],'g')
-    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;0;0],[0;0;10],'c')
+    quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),'r')
+    quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),'g')
+    quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),'c')
     
     % 3D model
     patch('Faces',f_bus,'Vertices',v_pan_cen,'FaceColor','blue')
@@ -63,9 +65,9 @@ hold off
 figure(); hold on
     
     % triad 
-    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[30;0;0],[0;0;0],[0;0;0],'r')
-    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;30;0],[0;0;0],'g')
-    quiver3(zeros(3,1),zeros(3,1),zeros(3,1),[0;0;0],[0;0;0],[0;0;30],'c')
+    quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),'r')
+    quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),'g')
+    quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),'c')
     
     % 3D model
     patch('Faces',f_bus,'Vertices',v_bus,'FaceColor',[0.5,0.5,0.5])
