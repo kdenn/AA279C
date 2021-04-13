@@ -30,30 +30,39 @@ visorsModel;
 triad_body = 30.*eye(3);
 triad_prin = A_rot*triad_body;
 
-% figure(); hold on
-%     
-%     % triad 
-%     quiver3(0,0,0,triad_prin(1,1),triad_prin(2,1),triad_prin(3,1),'r--','DisplayName','X-Principle')
-%     quiver3(0,0,0,triad_prin(1,2),triad_prin(2,2),triad_prin(3,2),'g--','DisplayName','Y-Principle')
-%     quiver3(0,0,0,triad_prin(1,3),triad_prin(2,3),triad_prin(3,3),'c--','DisplayName','Z-Principle')
-%     
-%     quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),'r','DisplayName','X-Body')
-%     quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),'g','DisplayName','Y-Body')
-%     quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),'c','DisplayName','Z-Body')
-%     
-%     % 3D model
-%     patch('Faces',f_bus,'Vertices',v_bus,'FaceColor',[0.5,0.5,0.5],'FaceAlpha',0.75,'DisplayName','Main Bus')
-%     patch('Faces',f_pan,'Vertices',v_pan_1,'FaceColor','blue','FaceAlpha',0.75,'DisplayName','Panel')
-%     patch('Faces',f_pan,'Vertices',v_pan_2,'FaceColor','blue','FaceAlpha',0.75,'DisplayName','Panel')
-%     
-%     xlabel('X (cm)')
-%     ylabel('Y (cm)')
-%     zlabel('Z (cm)')
-%     view(80+90,50)
-%     axis equal
-%     legend()
-%     
-% hold off
+figure(); hold on
+    
+    % triad 
+    quiver3(0,0,0,triad_prin(1,1),triad_prin(2,1),triad_prin(3,1),...
+        'r--','LineWidth',2,'DisplayName','X-Principle')
+    quiver3(0,0,0,triad_prin(1,2),triad_prin(2,2),triad_prin(3,2),...
+        'g--','LineWidth',2,'DisplayName','Y-Principle')
+    quiver3(0,0,0,triad_prin(1,3),triad_prin(2,3),triad_prin(3,3),...
+        'c--','LineWidth',2,'DisplayName','Z-Principle')
+    
+    quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),...
+        'r','LineWidth',2,'DisplayName','X-Body')
+    quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),...
+        'g','LineWidth',2,'DisplayName','Y-Body')
+    quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),...
+        'c','LineWidth',2,'DisplayName','Z-Body')
+    
+    % 3D model
+    patch('Faces',f_bus,'Vertices',v_bus,'FaceColor',[0.5,0.5,0.5],...
+        'FaceAlpha',0.75,'DisplayName','Main Bus')
+    patch('Faces',f_pan,'Vertices',v_pan_1,'FaceColor','blue',...
+        'FaceAlpha',0.75,'DisplayName','Panel')
+    patch('Faces',f_pan,'Vertices',v_pan_2,'FaceColor','blue',...
+        'FaceAlpha',0.75,'DisplayName','Panel')
+    
+    xlabel('X (cm)')
+    ylabel('Y (cm)')
+    zlabel('Z (cm)')
+    view(80+90,50)
+    axis equal
+    legend()
+    
+hold off
 
 %% 2-3)
 %{
@@ -77,10 +86,10 @@ w0 = deg2rad([-3;2;1]);
 norm(rad2deg(w0))
 
 % Sim time parameters
-t0 = 0; dt = 0.1; tf = 300; t_sim = [t0:dt:tf]';
+t0 = 0; dt = 0.1; tf = 500; t_sim = (t0:dt:tf)';
 
 % Call numerical integrator
-options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9);
+options = odeset('RelTol', 1e-9, 'AbsTol', 1e-9);
 [t_out, y_out] = ode45(@(t,y) int_Euler_eqs(t,y,I_princ), t_sim, w0, options);
 
 %% 2-5 and 2-6)
@@ -124,8 +133,8 @@ PlotPolhode(I_princ,w0_new,y_new,x_pnew,y_pnew)
 %}
 
 % Setting the satellite to be axially-symmetric about the x-axis
-Iy = (I_princ(2,2)+I_princ(3,3))/2;
-Iz = Iy;
+Ix = (I_princ(1,1)+I_princ(2,2))/2;
+Iy = Ix;
 I_symm = diag([Ix,Iy,Iz]);
 
 % Simulate
@@ -138,7 +147,31 @@ I_symm = diag([Ix,Iy,Iz]);
 %}
 
 [x_psymm,y_psymm,w_an] = polhodeAnalytical(I_symm,w0,t_sim);
-PlotPolhode(I_symm,w0,w_sy,x_psymm,y_psymm)
+PlotPolhode(I_symm,w0,w_sy)
+
+figure();
+
+    % xy plane
+    subplot(1,3,1); hold on; grid on; axis equal; 
+    plot(w_sy(:,1), w_sy(:,2), 'LineWidth', 2); 
+    xlabel('\omega_x (rad/s)'); ylabel('\omega_y (rad/s)');
+    title('Polhode in XY Plane');
+    plot(w_an(:,1),w_an(:,2), 'r-.');
+
+    % xz plane
+    subplot(1,3,2); hold on; grid on; axis equal;
+    plot(w_sy(:,1), w_sy(:,3), 'LineWidth', 2); 
+    xlabel('\omega_x (rad/s)'); ylabel('\omega_z (rad/s)');
+    title('Polhode in XZ Plane');
+    plot(w_an(:,1),w_an(:,3),'r-.');
+
+    % yz plane
+    subplot(1,3,3); hold on; grid on; axis equal;
+    plot(w_sy(:,2), w_sy(:,3), 'LineWidth', 2); 
+    xlabel('\omega_y (rad/s)'); ylabel('\omega_z (rad/s)');
+    title('Polhode in YZ Plane');
+    plot(w_an(:,2),w_an(:,3), 'r-.');
+    legend('Numerical', 'Analytical');
 
 %% 2-11) 
 %{
@@ -149,19 +182,20 @@ PlotPolhode(I_symm,w0,w_sy,x_psymm,y_psymm)
 %}
 
 figure();
-
+    
     subplot(3,1,1); hold on
+    title('Error between Analytical and Numerical')
     plot(t_sim,w_sy(:,1)-w_an(:,1))
     xlabel('time (s)')
-    ylabel('\omega_x (rad/s)')
+    ylabel('\delta\omega_x (rad/s)')
     subplot(3,1,2); hold on
     plot(t_sim,w_sy(:,2)-w_an(:,2))
     xlabel('time (s)')
-    ylabel('\omega_y (rad/s)')
+    ylabel('\delta\omega_y (rad/s)')
     subplot(3,1,3); hold on
     plot(t_sim,w_sy(:,3)-w_an(:,3))
     xlabel('time (s)')
-    ylabel('\omega_z (rad/s)')
+    ylabel('\delta\omega_z (rad/s)')
 
 %% Extra Function
 
@@ -171,12 +205,16 @@ Ix = I(1,1);
 Iy = I(2,2);
 Iz = I(3,3);
 
-% Plot the Polhode
+% Ellipse Parameters
 T = ((w0(1)^2 * Ix) + (w0(2)^2 * Iy) + (w0(3)^2 * Iz)) / 2;
 L = sqrt((w0(1)^2 * Ix^2) + (w0(2)^2 * Iy^2) + (w0(3)^2 * Iz^2));
 
-a_energy = sqrt(2*T/Ix); b_energy = sqrt(2*T/Iy); c_energy = sqrt(2*T/Iz);
-a_moment = L/Ix; b_moment = L/Iy; c_moment = L/Iz;
+a_energy = sqrt(2*T/Ix);
+b_energy = sqrt(2*T/Iy);
+c_energy = sqrt(2*T/Iz);
+a_moment = L/Ix;
+b_moment = L/Iy;
+c_moment = L/Iz;
 
 [Xe, Ye, Ze] = ellipsoid(0,0,0,a_energy,b_energy,c_energy);
 [Xm, Ym, Zm] = ellipsoid(0,0,0,a_moment,b_moment,c_moment);
@@ -193,6 +231,7 @@ figure();
     view(3);
    
 % Energy and Momentum Ellipsoids 2D views
+%{
 figure();
     
     % xy plane
@@ -221,33 +260,34 @@ figure();
     xlabel('\omega_x (rad/s)'); ylabel('\omega_y (rad/s)'); zlabel('\omega_z (rad/s)');
     title('Polhode and Energy/Momentum Ellipsoids in YZ'); legend();
     view([1,0,0]);
+%}
 
-    if exist('x_pol','var')
-    
-        figure();
+if exist('x_pol','var')
 
-            % xy plane
-            subplot(1,3,1); hold on; grid on; axis equal; 
-            plot(y_out(:,1), y_out(:,2), 'LineWidth', 2); 
-            xlabel('\omega_x (rad/s)'); ylabel('\omega_y (rad/s)');
-            title('Polhode in XY Plane');
-            plot(x_pol(:,1),y_pol(:,1), 'r-.');
+    figure();
 
-            % xz plane
-            subplot(1,3,2); hold on; grid on; axis equal;
-            plot(y_out(:,1), y_out(:,3), 'LineWidth', 2); 
-            xlabel('\omega_x (rad/s)'); ylabel('\omega_z (rad/s)');
-            title('Polhode in XZ Plane');
-            plot(x_pol(:,3), y_pol(:,3), 'r-.', x_pol(:,4), y_pol(:,4), 'r-.', x_pol(:,5), y_pol(:,5), 'r-.', x_pol(:,6), y_pol(:,6), 'r-.');
+        % xy plane
+        subplot(1,3,1); hold on; grid on; axis equal; 
+        plot(y_out(:,1), y_out(:,2), 'LineWidth', 2); 
+        xlabel('\omega_x (rad/s)'); ylabel('\omega_y (rad/s)');
+        title('Polhode in XY Plane');
+        plot(x_pol(:,1),y_pol(:,1), 'r-.');
 
-            % yz plane
-            subplot(1,3,3); hold on; grid on; axis equal;
-            plot(y_out(:,2), y_out(:,3), 'LineWidth', 2); 
-            xlabel('\omega_y (rad/s)'); ylabel('\omega_z (rad/s)');
-            title('Polhode in YZ Plane');
-            plot(x_pol(:,2),y_pol(:,2), 'r-.');
-            legend('Numerical', 'Analytical');
-            
-    end
+        % xz plane
+        subplot(1,3,2); hold on; grid on; axis equal;
+        plot(y_out(:,1), y_out(:,3), 'LineWidth', 2); 
+        xlabel('\omega_x (rad/s)'); ylabel('\omega_z (rad/s)');
+        title('Polhode in XZ Plane');
+        plot(x_pol(:,3), y_pol(:,3), 'r-.', x_pol(:,4), y_pol(:,4), 'r-.', x_pol(:,5), y_pol(:,5), 'r-.', x_pol(:,6), y_pol(:,6), 'r-.');
+
+        % yz plane
+        subplot(1,3,3); hold on; grid on; axis equal;
+        plot(y_out(:,2), y_out(:,3), 'LineWidth', 2); 
+        xlabel('\omega_y (rad/s)'); ylabel('\omega_z (rad/s)');
+        title('Polhode in YZ Plane');
+        plot(x_pol(:,2),y_pol(:,2), 'r-.');
+        legend('Numerical', 'Analytical');
+
+end
     
 end

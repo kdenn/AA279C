@@ -22,6 +22,38 @@ if dxz < 1E-4
     % Axially symmetric about y
 elseif dxy < 1E-4
     % Axially symmetric about z
+    
+    Im = Ix;
+    wx0 = w0(1);
+    wy0 = w0(2);
+    wz0 = w0(3);
+    lambda = wz0*(Iz-Im)/Im;
+    
+    wx_d0 = (-(Iz-Iy)*wy0*wz0)/Ix;
+    wy_d0 = (-(Ix-Iz)*wx0*wz0)/Iy;
+    wz_d0 = (-(Iy-Ix)*wx0*wy0)/Iz;
+    
+    c1 = (wx0/2) + (wx_d0/(2*1i*lambda));
+    c2 = (wx0/2) - (wx_d0/(2*1i*lambda));
+    
+    wz = ones(size(t)).*wz0;
+    wx = c1*exp(1i*lambda.*t)+c2*exp(-1i*lambda.*t);
+    wy = -1i*(c1*exp(1i*lambda.*t)-c2*exp(-1i*lambda.*t));
+    w_out = [wx,wy,wz];
+    
+    x(:,1) = ones(size(t)).*wx0;
+    y(:,1) = wy;
+    x(:,2) = wy;
+    y(:,2) = wz;
+    x(:,3) = x(:,1);
+    x(:,4) = x(:,1);
+    x(:,5) = -x(:,1);
+    x(:,6) = -x(:,1);
+    y(:,3) = wz;
+    y(:,4) = -wz;
+    y(:,5) = wz;
+    y(:,6) = -wz;
+    
 elseif dzy < 1E-4
     % Axially symmetric about x
     
