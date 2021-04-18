@@ -1,5 +1,6 @@
 function ydot = int_Euler_eqs(t,y,I_princ)
-% Joshua Geiser
+% Integrate Euler's Equations of Motion for angular momentum in principal
+% axes
 
 % Renaming variables
 Ix = I_princ(1,1); Iy = I_princ(2,2); Iz = I_princ(3,3);
