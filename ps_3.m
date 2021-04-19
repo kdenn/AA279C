@@ -36,7 +36,7 @@ q0 = [0; 0; 0; 1];
 % Sim time parameters
 t0 = 0; dt = 0.5; tf = visors.T*2; t_arr = (t0:dt:tf)';
 
-%{
+% {
 % Propagate angular velocity and attitude
 [w_body, quat_out] = propagate_attitude(t_arr, w0, q0);
 
@@ -93,6 +93,8 @@ legend('Herpolhode', 'Angular Momentum');
 view(3);
 
 %% 3-4c)
+
+DCM_ECI2RTN = rotECItoRTN(visors.Om,visors.incl,visors.w,visors.e,visors.nu);
 
 figure(); hold on; grid on;
 triad_inert = 30.*eye(3);
@@ -239,9 +241,6 @@ qns_eq = [0;0;0;1]; % = dcm2quat(eye(3)); % quaterions for all eul ang = 0
     hold off
 %}
 
-[rECI,vECI,rPQW,vPQW,nu] = OEtoRVv2(visors.e,visors.incl,visors.Om,visors.w,visors.M_0,visors.n,...
-    visors.mu); % Get ECI and PQW r,v for VISORS init
-DCM_ECI2RTN = rotECItoRTN(visors.Om,visors.incl,visors.w,visors.e,nu);
 w0_eq2 = DCM_ECI2RTN'*[0;0;1]; % rotation only about N
 qns_eq2 = dcm2quat(DCM_ECI2RTN); % quaterions for alignment to RTN
 

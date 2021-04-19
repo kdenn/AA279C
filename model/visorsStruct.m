@@ -14,6 +14,15 @@ function visors = visorsStruct()
     visors.n = n;
     visors.mu = mu;
     visors.JD_epoch = JD_epoch;
+    
+    [rECI,vECI,rPQW,vPQW,nu] = OEtoRVv2(visors.e,visors.incl,visors.Om,visors.w,visors.M_0,visors.n,...
+    visors.mu);
+
+    visors.r_ECI_0 = rECI;
+    visors.v_ECI_0 = vECI;
+    visors.r_PQW_0 = rPQW;
+    visors.v_PQW_0 = vPQW;
+    visors.nu_0 = nu;
 
     %% Inertia
     visorsInertia
