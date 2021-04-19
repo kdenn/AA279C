@@ -17,7 +17,7 @@ clear all; close all; clc;
     and as back-up in the case of singularities with 1.
 %}
 
-% see propagation/int_Euler_eqs.m
+% see propagation/int_Euler_Angles.m
 
 %% 3-3)
 %{
@@ -40,6 +40,23 @@ t0 = 0; dt = 0.5; tf = visors.T*2; t_arr = (t0:dt:tf)';
 % Propagate angular velocity and attitude
 [w_body, quat_out] = propagate_attitude(t_arr, w0, q0);
 
+figure(); 
+subplot(1,2,1); hold on; grid on;
+plot(t_arr'./60, w_body(1,:), 'DisplayName', '\omega_x');
+plot(t_arr'./60, w_body(2,:), 'DisplayName', '\omega_y');
+plot(t_arr'./60, w_body(3,:), 'DisplayName', '\omega_z');
+xlabel('Time (min)'); ylabel('\omega (rad/s)');
+legend(); axis([0 10 -0.1 0.1]);
+title('Angular Velocity Components vs Time');
+
+subplot(1,2,2); hold on; grid on;
+plot(t_arr'./60, quat_out(1,:), 'DisplayName', 'q_1');
+plot(t_arr'./60, quat_out(2,:), 'DisplayName', 'q_2');
+plot(t_arr'./60, quat_out(3,:), 'DisplayName', 'q_3');
+plot(t_arr'./60, quat_out(4,:), 'DisplayName', 'q_4');
+xlabel('Time (min)'); ylabel('Quaternion'); 
+legend(); axis([0 10 -1 1]);
+title('Quaternion Components vs Time'); 
 
 %% 3-4)
 %{
@@ -119,18 +136,17 @@ for i = i_indices
     quiver3(0,0,0,triad_prin(1,3),triad_prin(2,3),triad_prin(3,3),...
         'Color', [transp_i(i) transp_i(i) 1],'LineWidth',2,'DisplayName','Z-Principle');
 
-%     % body axes
-%     quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),...
-%         'r', 'LineWidth',2,'DisplayName','X-Body')
-%     quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),...
-%         'g--','LineWidth',2,'DisplayName','Y-Body')
-%     quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),...
-%         'c--','LineWidth',2,'DisplayName','Z-Body')
+    % body axes
+    quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),...
+        'Color', [1 transp_i(i) transp_i(i)], 'LineStyle', '--', 'LineWidth',2,'DisplayName','X-Body')
+    quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),...
+        'Color', [transp_i(i) 1 transp_i(i)], 'LineStyle', '--', 'LineWidth',2,'DisplayName','Y-Body')
+    quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),...
+        'Color', [transp_i(i) transp_i(i) 1], 'LineStyle', '--', 'LineWidth',2,'DisplayName','Z-Body')
 end
 xlabel('Inertial I'); ylabel('Inertial J'); zlabel('Inertial K');
 title('Principal Axes vs Time');
 view(3);
-%}
 
 
 %% 3-5)
