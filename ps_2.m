@@ -92,6 +92,13 @@ t0 = 0; dt = 0.1; tf = 500; t_sim = (t0:dt:tf)';
 options = odeset('RelTol', 1e-9, 'AbsTol', 1e-9);
 [t_out, y_out] = ode45(@(t,y) int_Euler_eqs(t,y,I_princ), t_sim, w0, options);
 
+figure(); hold on; grid on;
+plot(t_out, y_out(:,1), 'DisplayName', '\omega_x');
+plot(t_out, y_out(:,2), 'DisplayName', '\omega_y');
+plot(t_out, y_out(:,3), 'DisplayName', '\omega_z');
+xlabel('Time (s)'); ylabel('\omega (rad/s)'); legend();
+title('Angular Velocity Components vs Time');
+
 %% 2-5 and 2-6)
 %{
     5. Plot rotational kinetic energy and momentum ellipsoids in 3D (axis
