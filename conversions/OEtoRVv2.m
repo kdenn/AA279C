@@ -1,4 +1,4 @@
-function [rECI,vECI] = OEtoRVv2(e,i,Om,w,M,n,mu)
+function [rECI,vECI,rPQW,vPQW,nu] = OEtoRVv2(e,i,Om,w,M,n,mu)
 % Get ECI position and velocity from OE
 % INPUT:
 %   e: eccentricity
@@ -52,6 +52,8 @@ elseif i < 1e-6 && e < 1e-4
 else
     R = RzOm*Rxi*Rzw;
 end
+
+nu = atan2(rPQW(2),rPQW(1));
 
 %% Final ECI values
 rECI = R*rPQW; % km
