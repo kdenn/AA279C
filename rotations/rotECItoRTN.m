@@ -1,3 +1,3 @@
-function R = rotECItoRTN(Om,i,w,e,nu)
-R = R3(nu)*rotPQWtoIJK(Om,i,w,e)';
+function R = rotECItoRTN(Om,incl,w,e,nu)
+R = R3(nu)*rotPQWtoIJK(Om,incl,w,e)';
 end

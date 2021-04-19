@@ -12,11 +12,12 @@ function e_vec = dcm2eulax(A)
             e2 = 0;
             e3 = 1;
         else
-            e1 = (A(2,3) - A(3,2,n))/(2*sin(phi));
-            e2 = (A(3,1) - A(1,3,n))/(2*sin(phi));
-            e3 = (A(1,2) - A(2,1,n))/(2*sin(phi));
+            e1 = (A(2,3,n) - A(3,2,n))/(2*sin(phi));
+            e2 = (A(3,1,n) - A(1,3,n))/(2*sin(phi));
+            e3 = (A(1,2,n) - A(2,1,n))/(2*sin(phi));
         end
-        e_vec(:,n) = [e1;e2;e3;phi];
+        ev = [e1;e2;e3]./norm([e1;e2;e3]);
+        e_vec(:,n) = [ev;phi];
     end
 
 end

@@ -14,14 +14,14 @@ R_earth = s3_constants('R_EARTH');
 %% Orbit Elements
 a = (600*1000) + s3_constants('R_EARTH'); % (m)
 e = 0.001;
-i = deg2rad(98);
+incl = deg2rad(98);
 Om = deg2rad(330);
 w = deg2rad(45);
 M_0 = deg2rad(45);
 T = 2*pi/sqrt(mu/a^3);
 n = 2*pi/T;
 
-oe = [a e i Om w M_0]';
+oe = [a e incl Om w M_0]';
 
 %% Timing
 Y_epoch = 2021;
