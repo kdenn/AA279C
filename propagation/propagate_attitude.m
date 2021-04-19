@@ -29,7 +29,7 @@ for i = 1:N-1
     % Step quaternion
     q0 = quat_out(:,i);
     [t_out, q_out] = ode45(@(t,y) int_quaternion(t,y,w_out(end,:)'), t_prop, q0, options);
-    quat_out(:,i+1) = q_out(end,:)';
+    quat_out(:,i+1) = q_out(end,:)'./norm(q_out(end,:)');
 end
 
 end
