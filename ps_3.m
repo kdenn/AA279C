@@ -37,6 +37,7 @@ q0 = [0; 0; 0; 1];
 % Sim time parameters
 t0 = 0; dt = 0.5; tf = T*2; t_arr = (t0:dt:tf)';
 
+% {
 % Propagate angular velocity and attitude
 [w_body, quat_out] = propagate_attitude(t_arr, w0, q0);
 
@@ -128,6 +129,7 @@ end
 xlabel('Inertial I'); ylabel('Inertial J'); zlabel('Inertial K');
 title('Principal Axes vs Time');
 view(3);
+%}
 
 
 %% 3-5)
@@ -144,6 +146,16 @@ Equilibrium tests
     removing them for verification).
 %}
 
+w0_eq = [0;0;w0(3)]; % rotation only about inertial z
+qns_eq = dcm2quat(eye(3)); % quaterions for all eul ang = 0, qns = [0;0;0;1]
+[w_out_eq, qns_out_eq] = propagate_attitude(t_arr, w0_eq, qns_eq);
+
+
+[rECI,vECI,rPQW,vPQW,nu] = OEtoRVv2(e,i,Om,w,M_0,n,mu); % Get ECI and PQW r,v for VISORS init
+DCM_ECI2RTN = rotECItoRTN(Om,i,w,e,nu);
+w0_rtn = DCM_ECI2RTN'*[0;0;w0(3)]; % rotation only about N
+qns_rtn = dcm2quat(DCM_ECI2RTN); % quaterions for alignment to RTN
+%[w_out_rtn, qns_out_rtn] = propagate_attitude(t_arr, w0_rtn, qns_rtn);
 
 
 %% 3-6)
