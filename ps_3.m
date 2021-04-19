@@ -36,7 +36,7 @@ q0 = [0; 0; 0; 1];
 % Sim time parameters
 t0 = 0; dt = 0.5; tf = visors.T*2; t_arr = (t0:dt:tf)';
 
-% {
+%{
 % Propagate angular velocity and attitude
 [w_body, quat_out] = propagate_attitude(t_arr, w0, q0);
 
@@ -147,15 +147,201 @@ Equilibrium tests
 
 w0_eq = [0;0;w0(3)]; % rotation only about inertial z
 qns_eq = [0;0;0;1]; % = dcm2quat(eye(3)); % quaterions for all eul ang = 0
-[w_out_eq, qns_out_eq] = propagate_attitude(t_arr, w0_eq, qns_eq);
 
+% {
+[w_out_eq1, qns_out_eq1] = propagate_attitude(t_arr, w0_eq, qns_eq);
 
-[rECI,vECI,rPQW,vPQW,nu] = OEtoRVv2(visors.e,visors.i,visors.Om,visors.w,visors.M_0,visors.n,...
+    % Angular Velocity
+    w_max = 2*max(max(abs(w_out_eq1)));
+    figure(); hold on
+
+        subplot(3,1,1); hold on
+        plot(t_arr,w_out_eq1(1,:))
+        xlabel('t (s)')
+        ylabel('\omega_x (rad/s)')
+        ylim([-w_max,w_max])
+        hold off
+
+        subplot(3,1,2); hold on
+        plot(t_arr,w_out_eq1(2,:))
+        xlabel('t (s)')
+        ylabel('\omega_y (rad/s)')
+        ylim([-w_max,w_max])
+        hold off
+
+        subplot(3,1,3); hold on
+        plot(t_arr,w_out_eq1(3,:))
+        xlabel('t (s)')
+        ylabel('\omega_z (rad/s)')
+        ylim([-w_max,w_max])
+        hold off
+
+    hold off
+    
+    % Quaternions
+    figure(); hold on
+
+        subplot(4,1,1); hold on
+        plot(t_arr,qns_out_eq1(1,:))
+        xlabel('t (s)')
+        ylabel('q_1')
+        hold off
+
+        subplot(4,1,2); hold on
+        plot(t_arr,qns_out_eq1(2,:))
+        xlabel('t (s)')
+        ylabel('q_2')
+        hold off
+
+        subplot(4,1,3); hold on
+        plot(t_arr,qns_out_eq1(3,:))
+        xlabel('t (s)')
+        ylabel('q_3')
+        hold off
+
+        subplot(4,1,4); hold on
+        plot(t,qns_out_eq1(4,:))
+        xlabel('t (s)')
+        ylabel('q_4')
+        hold off
+
+    hold off
+
+    % Euler Angles
+    A = quat2dcm(qns_out_eq1);
+    eulax = dcm2eulax(A);
+    figure(); hold on
+
+        subplot(4,1,1); hold on
+        plot(t_arr,eulax(1,:))
+        xlabel('t (s)')
+        ylabel('e_x')
+        hold off
+
+        subplot(4,1,2); hold on
+        plot(t_arr,eulax(2,:))
+        xlabel('t (s)')
+        ylabel('e_y')
+        hold off
+
+        subplot(4,1,3); hold on
+        plot(t_arr,eulax(3,:))
+        xlabel('t (s)')
+        ylabel('e_z')
+        hold off
+
+        subplot(4,1,4); hold on
+        plot(t_arr,eulax(4,:))
+        xlabel('t (s)')
+        ylabel('\Phi (rad)')
+        hold off
+
+    hold off
+%}
+
+[rECI,vECI,rPQW,vPQW,nu] = OEtoRVv2(visors.e,visors.incl,visors.Om,visors.w,visors.M_0,visors.n,...
     visors.mu); % Get ECI and PQW r,v for VISORS init
-DCM_ECI2RTN = rotECItoRTN(visors.Om,visors.i,visors.w,visors.e,nu);
-w0_rtn = DCM_ECI2RTN'*[0;0;w0(3)]; % rotation only about N
-qns_rtn = dcm2quat(DCM_ECI2RTN); % quaterions for alignment to RTN
-%[w_out_rtn, qns_out_rtn] = propagate_attitude(t_arr, w0_rtn, qns_rtn);
+DCM_ECI2RTN = rotECItoRTN(visors.Om,visors.incl,visors.w,visors.e,nu);
+w0_eq2 = DCM_ECI2RTN'*[0;0;w0(3)]; % rotation only about N
+qns_eq2 = dcm2quat(DCM_ECI2RTN); % quaterions for alignment to RTN
+
+% {
+[w_out_eq2, qns_out_eq2] = propagate_attitude(t_arr, w0_eq2, qns_eq2);
+w_out_eq2_rtn = DCM_ECI2RTN*w_out_eq2;
+
+    % Angular Velocity
+    w_max = 2*max(max(abs(w_out_eq2)));
+    figure(); hold on
+
+        subplot(3,1,1); hold on
+        plot(t_arr,w_out_eq2(1,:),'DisplayName','\omega_x ECI')
+        plot(t_arr,w_out_eq2_rtn(1,:),'DisplayName','\omega_x RTN')
+        xlabel('t (s)')
+        ylabel('\omega_x (rad/s)')
+        ylim([-w_max,w_max])
+        legend()
+        hold off
+
+        subplot(3,1,2); hold on
+        plot(t_arr,w_out_eq2(2,:),'DisplayName','\omega_y ECI')
+        plot(t_arr,w_out_eq2_rtn(2,:),'DisplayName','\omega_y RTN')
+        xlabel('t (s)')
+        ylabel('\omega_y (rad/s)')
+        ylim([-w_max,w_max])
+        legend()
+        hold off
+
+        subplot(3,1,3); hold on
+        plot(t_arr,w_out_eq2(3,:),'DisplayName','\omega_z ECI')
+        plot(t_arr,w_out_eq2_rtn(3,:),'DisplayName','\omega_z RTN')
+        xlabel('t (s)')
+        ylabel('\omega_z (rad/s)')
+        ylim([-w_max,w_max])
+        legend()
+        hold off
+
+    hold off
+    
+    % Quaternions
+    figure(); hold on
+
+        subplot(4,1,1); hold on
+        plot(t_arr,qns_out_eq2(1,:))
+        xlabel('t (s)')
+        ylabel('q_1')
+        hold off
+
+        subplot(4,1,2); hold on
+        plot(t_arr,qns_out_eq2(2,:))
+        xlabel('t (s)')
+        ylabel('q_2')
+        hold off
+
+        subplot(4,1,3); hold on
+        plot(t_arr,qns_out_eq2(3,:))
+        xlabel('t (s)')
+        ylabel('q_3')
+        hold off
+
+        subplot(4,1,4); hold on
+        plot(t_arr,qns_out_eq2(4,:))
+        xlabel('t (s)')
+        ylabel('q_4')
+        hold off
+
+    hold off
+
+    % Euler Angles
+    A = quat2dcm(qns_out_eq2);
+    eulax = dcm2eulax(A);
+    figure(); hold on
+
+        subplot(4,1,1); hold on
+        plot(t_arr,eulax(1,:))
+        xlabel('t (s)')
+        ylabel('e_x')
+        hold off
+
+        subplot(4,1,2); hold on
+        plot(t_arr,eulax(2,:))
+        xlabel('t (s)')
+        ylabel('e_y')
+        hold off
+
+        subplot(4,1,3); hold on
+        plot(t_arr,eulax(3,:))
+        xlabel('t (s)')
+        ylabel('e_z')
+        hold off
+
+        subplot(4,1,4); hold on
+        plot(t_arr,eulax(4,:))
+        xlabel('t (s)')
+        ylabel('\Phi (rad)')
+        hold off
+
+    hold off
+%}
 
 
 %% 3-6)
