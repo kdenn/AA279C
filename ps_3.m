@@ -27,8 +27,7 @@ clear all; close all; clc;
     inertial axes.
 %}
 
-visorsInertia;
-visorsOrbit;
+visors = visorsStruct();
 
 % Initial Conditions
 w0 = deg2rad([-3;2;1]);
@@ -56,7 +55,7 @@ now possible to express vectors in the reference systems of interest
 %}
 
 % Calculations for inertial angular momentum/velocity
-L_body = I_princ * w_body;
+L_body = visors.I_princ * w_body;
 L_inert = zeros(3,length(t_arr));
 w_inert = zeros(3,length(t_arr));
 for i = 1:length(t_arr)
@@ -108,7 +107,7 @@ for i = i_indices
 
     DCM = quat2dcm(quat_out(:,i));
     triad_prin = DCM * triad_inert;
-    triad_body = A_rot' * triad_prin; % Doesn't seem to be right
+    triad_body = visors.A_rot' * triad_prin; % Doesn't seem to be right
 
     % principal axes
     quiver3(0,0,0,triad_prin(1,1),triad_prin(2,1),triad_prin(3,1),...
@@ -147,12 +146,13 @@ Equilibrium tests
 %}
 
 w0_eq = [0;0;w0(3)]; % rotation only about inertial z
-qns_eq = dcm2quat(eye(3)); % quaterions for all eul ang = 0, qns = [0;0;0;1]
+qns_eq = [0;0;0;1]; % = dcm2quat(eye(3)); % quaterions for all eul ang = 0
 [w_out_eq, qns_out_eq] = propagate_attitude(t_arr, w0_eq, qns_eq);
 
 
-[rECI,vECI,rPQW,vPQW,nu] = OEtoRVv2(e,i,Om,w,M_0,n,mu); % Get ECI and PQW r,v for VISORS init
-DCM_ECI2RTN = rotECItoRTN(Om,i,w,e,nu);
+[rECI,vECI,rPQW,vPQW,nu] = OEtoRVv2(visors.e,visors.i,visors.Om,visors.w,visors.M_0,visors.n,...
+    visors.mu); % Get ECI and PQW r,v for VISORS init
+DCM_ECI2RTN = rotECItoRTN(visors.Om,visors.i,visors.w,visors.e,nu);
 w0_rtn = DCM_ECI2RTN'*[0;0;w0(3)]; % rotation only about N
 qns_rtn = dcm2quat(DCM_ECI2RTN); % quaterions for alignment to RTN
 %[w_out_rtn, qns_out_rtn] = propagate_attitude(t_arr, w0_rtn, qns_rtn);

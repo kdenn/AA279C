@@ -19,6 +19,7 @@ Om = deg2rad(330);
 w = deg2rad(45);
 M_0 = deg2rad(45);
 T = 2*pi/sqrt(mu/a^3);
+n = 2*pi/T;
 
 oe = [a e i Om w M_0]';
 
