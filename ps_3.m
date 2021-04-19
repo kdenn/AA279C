@@ -5,7 +5,7 @@ clear all; close all; clc;
 
 %% 3-1)
 %{
-    Program Kinematic equations of motion correspondent to a nominal attitude parameterization. 
+    Program Kinematic equations of motion correspondent to a nominal attitude parameterization.
 %}
 
 % see propagation/int_quaternion.m
@@ -16,6 +16,8 @@ clear all; close all; clc;
     (either Euler sequence or Quaternions). This is used for comparison, to get familiar with different approach,
     and as back-up in the case of singularities with 1.
 %}
+
+% see propagation/int_Euler_eqs.m
 
 %% 3-3)
 %{
@@ -81,12 +83,12 @@ xlabel('Time (min)'); ylabel('L_z (kg m^2 / s)');
 axis([0 tf/60 -0.01 0.01]);
 title('Inertial Angular Momentum vs Time - L_z');
 
-%% 3-4b) 
+%% 3-4b)
 figure(); hold on; grid on; axis equal;
 plot3(w_inert(1,:), w_inert(2,:), w_inert(3,:));
 quiver3(0,0,0,L_inert(1,1),L_inert(2,1),L_inert(3,1), 10);
 xlabel('Inertial I'); ylabel('Inertial J'); zlabel('Inertial K');
-title('Herpolhode and Angular Momentum Vector in 3D Inertial Space'); 
+title('Herpolhode and Angular Momentum Vector in 3D Inertial Space');
 legend('Herpolhode', 'Angular Momentum');
 view(3);
 
@@ -102,19 +104,19 @@ i_indices = 1:2:50;
 transp_i = linspace(1, 0, i_indices(end));
 
 for i = i_indices
-    
+
     DCM = quat2dcm(quat_out(:,i));
     triad_prin = DCM * triad_inert;
     triad_body = A_rot' * triad_prin; % Doesn't seem to be right
-    
-    % principal axes 
+
+    % principal axes
     quiver3(0,0,0,triad_prin(1,1),triad_prin(2,1),triad_prin(3,1),...
         'Color', [1 transp_i(i) transp_i(i)],'LineWidth',2,'DisplayName','X-Principle');
     quiver3(0,0,0,triad_prin(1,2),triad_prin(2,2),triad_prin(3,2),...
         'Color', [transp_i(i) 1 transp_i(i)],'LineWidth',2,'DisplayName','Y-Principle');
     quiver3(0,0,0,triad_prin(1,3),triad_prin(2,3),triad_prin(3,3),...
         'Color', [transp_i(i) transp_i(i) 1],'LineWidth',2,'DisplayName','Z-Principle');
-    
+
 %     % body axes
 %     quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),...
 %         'r', 'LineWidth',2,'DisplayName','X-Body')
@@ -142,8 +144,10 @@ Equilibrium tests
     removing them for verification).
 %}
 
+
+
 %% 3-6)
-%{ 
+%{
 Stability tests
     a. Pretend you have a single-spin satellite. Set initial conditions to correspond alternatively to the 3
     possible equilibrium configurations (rotation about principal axes of inertia). Slightly perturb initial
