@@ -34,7 +34,7 @@ w0 = deg2rad([-3;2;1]);
 q0 = [0; 0; 0; 1];
 
 % Sim time parameters
-t0 = 0; dt = 0.5; tf = T*2; t_arr = (t0:dt:tf)';
+t0 = 0; dt = 0.5; tf = visors.T*2; t_arr = (t0:dt:tf)';
 
 % {
 % Propagate angular velocity and attitude
