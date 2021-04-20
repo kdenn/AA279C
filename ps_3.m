@@ -36,27 +36,26 @@ q0 = [0; 0; 0; 1];
 % Sim time parameters
 t0 = 0; dt = 0.5; tf = visors.T*2; t_arr = (t0:dt:tf)';
 
-%{
+% {
 % Propagate angular velocity and attitude
 [w_body, quat_out] = propagate_attitude(t_arr, w0, q0);
 
-figure(); 
-subplot(1,2,1); hold on; grid on;
+figure(); hold on; grid on;
 plot(t_arr'./60, w_body(1,:), 'DisplayName', '\omega_x');
 plot(t_arr'./60, w_body(2,:), 'DisplayName', '\omega_y');
 plot(t_arr'./60, w_body(3,:), 'DisplayName', '\omega_z');
-xlabel('Time (min)'); ylabel('\omega (rad/s)');
-legend(); axis([0 10 -0.1 0.1]);
-title('Angular Velocity Components vs Time');
+xlabel('t (min)'); ylabel('\omega (rad/s)');
+legend(); axis([0 12 -0.1 0.1]);
+hold off
 
-subplot(1,2,2); hold on; grid on;
+figure(); hold on; grid on;
 plot(t_arr'./60, quat_out(1,:), 'DisplayName', 'q_1');
 plot(t_arr'./60, quat_out(2,:), 'DisplayName', 'q_2');
 plot(t_arr'./60, quat_out(3,:), 'DisplayName', 'q_3');
 plot(t_arr'./60, quat_out(4,:), 'DisplayName', 'q_4');
-xlabel('Time (min)'); ylabel('Quaternion'); 
-legend(); axis([0 10 -1 1]);
-title('Quaternion Components vs Time'); 
+xlabel('t (min)'); ylabel('q'); 
+legend(); axis([0 12 -1 1]);
+hold off
 %}
 
 %% 3-4)
@@ -125,7 +124,7 @@ for n = 1:N
         visors.e,rv_array(n,1:3)');
 end
 
-%{
+% {
 figure(); hold on; grid on;
 triad_inert = 30.*eye(3);
 
@@ -165,9 +164,10 @@ for i = i_indices
         'Color', [transp_i(i) 1 transp_i(i)], 'LineStyle', ':', 'LineWidth',2,'DisplayName','T')
     quiver3(0,0,0,triad_RTN(1,3),triad_RTN(2,3),triad_RTN(3,3),...
         'Color', [transp_i(i) transp_i(i) 1], 'LineStyle', ':', 'LineWidth',2,'DisplayName','N')
+
 end
 xlabel('Inertial I'); ylabel('Inertial J'); zlabel('Inertial K');
-title('Principal Axes vs Time');
+% title('Principal Axes vs Time');
 view(3);
 
 %}
@@ -195,62 +195,29 @@ t_arr_min = t_arr./60;
 [w_out_z, qns_out_z] = propagate_attitude(t_arr, w0_z, qns_eq);
 
     % Angular Velocity
-    w_max = 2*max(max(abs(w_out_z)));
-    figure(); hold on
+    figure(); hold on; grid on;
 
-        subplot(3,1,1); hold on
-        plot(t_arr_min,w_out_z(1,:))
+        plot(t_arr_min,w_out_z(1,:),'DisplayName','\omega_x ','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,w_out_z(2,:),'DisplayName','\omega_y ')
+        plot(t_arr_min,w_out_z(3,:),'DisplayName','\omega_z ')
         xlabel('t (min)')
-        ylabel('\omega_x (rad/s)')
-        axis([0,10,-0.1,0.1])
-        hold off
-
-        subplot(3,1,2); hold on
-        plot(t_arr_min,w_out_z(2,:))
-        xlabel('t (min)')
-        ylabel('\omega_y (rad/s)')
-        axis([0,10,-0.1,0.1])
-        hold off
-
-        subplot(3,1,3); hold on
-        plot(t_arr_min,w_out_z(3,:))
-        xlabel('t (min)')
-        ylabel('\omega_z (rad/s)')
-        axis([0,10,-0.1,0.1])
-        hold off
+        ylabel('\omega (rad/s)')
+        axis([0,12,-0.03,0.03])
+        legend()
 
     hold off
     
     % Quaternions
-    figure(); hold on
+    figure(); hold on; grid on;
 
-        subplot(4,1,1); hold on
-        plot(t_arr_min,qns_out_z(1,:))
+        plot(t_arr_min,qns_out_z(1,:),'DisplayName','q_1','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,qns_out_z(2,:),'DisplayName','q_2')
+        plot(t_arr_min,qns_out_z(3,:),'DisplayName','q_3')
+        plot(t_arr_min,qns_out_z(4,:),'DisplayName','q_4')
         xlabel('t (min)')
-        ylabel('q_1')
-        axis([0,10,-1,1])
-        hold off
-
-        subplot(4,1,2); hold on
-        plot(t_arr_min,qns_out_z(2,:))
-        xlabel('t (min)')
-        ylabel('q_2')
-        axis([0,10,-1,1])
-        hold off
-
-        subplot(4,1,3); hold on
-        plot(t_arr_min,qns_out_z(3,:))
-        xlabel('t (min)')
-        ylabel('q_3')
-        axis([0,10,-1,1])
-        hold off
-
-        subplot(4,1,4); hold on
-        plot(t_arr_min,qns_out_z(4,:))
-        xlabel('t (min)')
-        ylabel('q_4')
-        axis([0,10,-1,1])
-        hold off
+        ylabel('q')
+        axis([0,12,-1,1])
+        legend()
 
     hold off
 
@@ -259,38 +226,27 @@ t_arr_min = t_arr./60;
     eulax = dcm2eulax(A);
     figure(); hold on
 
-        subplot(4,1,1); hold on
-        plot(t_arr_min,eulax(1,:))
+        subplot(2,1,1); hold on; grid on;
+        plot(t_arr_min,eulax(1,:),'DisplayName','e_x','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,eulax(2,:),'DisplayName','e_y')
+        plot(t_arr_min,eulax(3,:),'DisplayName','e_z')
         xlabel('t (min)')
-        ylabel('e_x')
-        axis([0,10,-1,1])
+        ylabel('e')
+        axis([0,12,-1,1])
+        legend()
         hold off
 
-        subplot(4,1,2); hold on
-        plot(t_arr_min,eulax(2,:))
-        xlabel('t (min)')
-        ylabel('e_y')
-        axis([0,10,-1,1])
-        hold off
-
-        subplot(4,1,3); hold on
-        plot(t_arr_min,eulax(3,:))
-        xlabel('t (min)')
-        ylabel('e_z')
-        axis([0,10,-1,1])
-        hold off
-
-        subplot(4,1,4); hold on
-        plot(t_arr_min,eulax(4,:))
+        subplot(2,1,2); hold on; grid on;
+        plot(t_arr_min,eulax(4,:),'DisplayName','\Phi')
         xlabel('t (min)')
         ylabel('\Phi (rad)')
-        axis([0,10,-pi,pi])
+        axis([0,12,0,pi])
         hold off
 
     hold off
 %}
 
-w0_eq2 = DCM_ECI2RTN(:,:,1)'*[0;0;1]; % rotation only about N
+w0_eq2 = DCM_ECI2RTN(:,:,1)'*[0;0;w0(3)]; % rotation only about N
 qns_eq2 = dcm2quat(DCM_ECI2RTN(:,:,1)); % quaterions for alignment to RTN
 
 % {
@@ -302,67 +258,32 @@ end
 
     % Angular Velocity
     w_max = 2*max(max(abs(w_out_eq2)));
-    figure(); hold on
+    figure(); hold on; grid on;
 
-        subplot(3,1,1); hold on
-        plot(t_arr_min,w_out_eq2(1,:),'DisplayName','\omega_x ECI')
-        plot(t_arr_min,w_out_eq2_rtn(1,:),'DisplayName','\omega_x RTN')
+        plot(t_arr_min,w_out_eq2(1,:),'DisplayName','\omega_x ECI','Color',[0, 0.4470, 0.7410])
+        plot(t_arr_min,w_out_eq2_rtn(1,:),'DisplayName','\omega_x RTN','LineStyle',':','Color',[0, 0.4470, 0.7410])
+        plot(t_arr_min,w_out_eq2(2,:),'DisplayName','\omega_y ECI','Color',[0.8500, 0.3250, 0.0980])
+        plot(t_arr_min,w_out_eq2_rtn(2,:),'DisplayName','\omega_y RTN','LineStyle',':','Color',[0.8500, 0.3250, 0.0980])
+        plot(t_arr_min,w_out_eq2(3,:),'DisplayName','\omega_z ECI','Color',[0.9290, 0.6940, 0.1250])
+        plot(t_arr_min,w_out_eq2_rtn(3,:),'DisplayName','\omega_z RTN','LineStyle',':','Color',[0.9290, 0.6940, 0.1250])
         xlabel('t (min)')
         ylabel('\omega_x (rad/s)')
-        axis([0,10,-0.1,0.1])
-        legend()
-        hold off
-
-        subplot(3,1,2); hold on
-        plot(t_arr_min,w_out_eq2(2,:),'DisplayName','\omega_y ECI')
-        plot(t_arr_min,w_out_eq2_rtn(2,:),'DisplayName','\omega_y RTN')
-        xlabel('t (min)')
-        ylabel('\omega_y (rad/s)')
-        axis([0,10,-0.1,0.1])
-        legend()
-        hold off
-
-        subplot(3,1,3); hold on
-        plot(t_arr_min,w_out_eq2(3,:),'DisplayName','\omega_z ECI')
-        plot(t_arr_min,w_out_eq2_rtn(3,:),'DisplayName','\omega_z RTN')
-        xlabel('t (min)')
-        ylabel('\omega_z (rad/s)')
-        axis([0,10,-0.1,0.1])
-        legend()
-        hold off
+        axis([0,30,-w_max,w_max])
+        legend('Location','southeast')
 
     hold off
     
     % Quaternions
-    figure(); hold on
+    figure(); hold on; grid on;
 
-        subplot(4,1,1); hold on
-        plot(t_arr_min,qns_out_eq2(1,:))
+        plot(t_arr_min,qns_out_eq2(1,:),'DisplayName','q_1')
+        plot(t_arr_min,qns_out_eq2(2,:),'DisplayName','q_2')
+        plot(t_arr_min,qns_out_eq2(3,:),'DisplayName','q_3')
+        plot(t_arr_min,qns_out_eq2(4,:),'DisplayName','q_4')
         xlabel('t (min)')
-        ylabel('q_1')
-        axis([0,10,-1,1])
-        hold off
-
-        subplot(4,1,2); hold on
-        plot(t_arr_min,qns_out_eq2(2,:))
-        xlabel('t (min)')
-        ylabel('q_2')
-        axis([0,10,-1,1])
-        hold off
-
-        subplot(4,1,3); hold on
-        plot(t_arr_min,qns_out_eq2(3,:))
-        xlabel('t (min)')
-        ylabel('q_3')
-        axis([0,10,-1,1])
-        hold off
-
-        subplot(4,1,4); hold on
-        plot(t_arr_min,qns_out_eq2(4,:))
-        xlabel('t (min)')
-        ylabel('q_4')
-        axis([0,10,-1,1])
-        hold off
+        ylabel('q')
+        legend('Location','southeast')
+        axis([0,30,-1,1])
 
     hold off
 
@@ -371,32 +292,21 @@ end
     eulax = dcm2eulax(A);
     figure(); hold on
 
-        subplot(4,1,1); hold on
-        plot(t_arr_min,eulax(1,:))
+        subplot(2,1,1); hold on; grid on;
+        plot(t_arr_min,eulax(1,:),'DisplayName','e_x')
+        plot(t_arr_min,eulax(2,:),'DisplayName','e_y')
+        plot(t_arr_min,eulax(3,:),'DisplayName','e_z')
         xlabel('t (min)')
-        ylabel('e_x')
-        axis([0,10,-1,1])
+        ylabel('e')
+        axis([0,30,-1,1])
+        legend('Location','southeast')
         hold off
 
-        subplot(4,1,2); hold on
-        plot(t_arr_min,eulax(2,:))
-        xlabel('t (min)')
-        ylabel('e_y')
-        axis([0,10,-1,1])
-        hold off
-
-        subplot(4,1,3); hold on
-        plot(t_arr_min,eulax(3,:))
-        xlabel('t (min)')
-        ylabel('e_z')
-        axis([0,10,-1,1])
-        hold off
-
-        subplot(4,1,4); hold on
+        subplot(2,1,2); hold on; grid on;
         plot(t_arr_min,eulax(4,:))
         xlabel('t (min)')
         ylabel('\Phi (rad)')
-        axis([0,10,-pi,pi])
+        axis([0,30,0,pi])
         hold off
 
     hold off
@@ -424,180 +334,84 @@ w_pert = -w0(3).*[.01;.01;.01];
 [w_out_y, qns_out_y] = propagate_attitude(t_arr, w0_y+w_pert, qns_eq);
 [w_out_z, qns_out_z] = propagate_attitude(t_arr, w0_z+w_pert, qns_eq);
 
-    % Angular Velocity
+    %% Angular Velocity
     w_max = 2*max(max(abs(w_out_z)));
-    figure(); hold on
+%     figure(); hold on
     
         % w_x
 
-        subplot(3,3,1); hold on
-        plot(t_arr_min,w_out_x(1,:),'DisplayName','x-spin')
+        figure(); hold on; grid on;
+        plot(t_arr_min,w_out_x(1,:),'DisplayName','\omega_x')
+        plot(t_arr_min,w_out_x(2,:),'DisplayName','\omega_y','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,w_out_x(3,:),'DisplayName','\omega_z')
         xlabel('t (min)')
-        ylabel('\omega_x (rad/s)')
-        axis([0,10,-0.1,0.1])
-        title('X-Spin')
+        ylabel('\omega (rad/s)')
+        axis([0,12*4,-0.03,0.03])
+        legend()
+%         title('X-Spin')
         hold off
         
-        subplot(3,3,2); hold on
-        plot(t_arr_min,w_out_y(1,:),'DisplayName','y-spin')
+        figure(); hold on; grid on;
+        plot(t_arr_min,w_out_y(1,:),'DisplayName','\omega_x','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,w_out_y(2,:),'DisplayName','\omega_y')
+        plot(t_arr_min,w_out_y(3,:),'DisplayName','\omega_z')
         xlabel('t (min)')
-        ylabel('\omega_x (rad/s)')
-        axis([0,10,-0.1,0.1])
-        title('Y-Spin')
+        ylabel('\omega (rad/s)')
+        axis([0,12*4,-0.03,0.03])
+        legend()
+%         title('Y-Spin')
         hold off
         
-        subplot(3,3,3); hold on
-        plot(t_arr_min,w_out_z(1,:),'DisplayName','z-spin')
+        figure(); hold on; grid on;
+        plot(t_arr_min,w_out_z(1,:),'DisplayName','\omega_x','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,w_out_z(2,:),'DisplayName','\omega_y')
+        plot(t_arr_min,w_out_z(3,:),'DisplayName','\omega_z')
         xlabel('t (min)')
-        ylabel('\omega_x (rad/s)')
-        axis([0,10,-0.1,0.1])
-        title('Z-Spin')
-        hold off
-        
-        % w_y
-
-        subplot(3,3,4); hold on
-        plot(t_arr_min,w_out_x(2,:),'DisplayName','x-spin')
-        xlabel('t (min)')
-        ylabel('\omega_y (rad/s)')
-        axis([0,10,-0.1,0.1])
-        hold off
-        
-        subplot(3,3,5); hold on
-        plot(t_arr_min,w_out_y(2,:),'DisplayName','y-spin')
-        xlabel('t (min)')
-        ylabel('\omega_y (rad/s)')
-        axis([0,10,-0.1,0.1])
-        hold off
-        
-        subplot(3,3,6); hold on
-        plot(t_arr_min,w_out_z(2,:),'DisplayName','z-spin')
-        xlabel('t (min)')
-        ylabel('\omega_y (rad/s)')
-        axis([0,10,-0.1,0.1])
-        hold off
-        
-        % w_z
-
-        subplot(3,3,7); hold on
-        plot(t_arr_min,w_out_x(3,:),'DisplayName','x-spin')
-        xlabel('t (min)')
-        ylabel('\omega_z (rad/s)')
-        axis([0,10,-0.1,0.1])
-        hold off
-        
-        subplot(3,3,8); hold on
-        plot(t_arr_min,w_out_y(3,:),'DisplayName','y-spin')
-        xlabel('t (min)')
-        ylabel('\omega_z (rad/s)')
-        axis([0,10,-0.1,0.1])
-        hold off
-        
-        subplot(3,3,9); hold on
-        plot(t_arr_min,w_out_z(3,:),'DisplayName','z-spin')
-        xlabel('t (min)')
-        ylabel('\omega_z (rad/s)')
-        axis([0,10,-0.1,0.1])
+        ylabel('\omega (rad/s)')
+        axis([0,12*4,-0.03,0.03])
+        legend()
+%         title('Z-Spin')
         hold off
 
-    hold off
+    
     
     % Quaternions
-    figure(); hold on
+%     figure(); hold on
         
-        % q_1
-        
-        subplot(4,3,1); hold on
-        plot(t_arr_min,qns_out_x(1,:),'DisplayName','x-spin')
+        figure(); hold on; grid on;
+        plot(t_arr_min,qns_out_x(1,:),'DisplayName','q_1')
+        plot(t_arr_min,qns_out_x(2,:),'DisplayName','q_2','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,qns_out_x(3,:),'DisplayName','q_3')
+        plot(t_arr_min,qns_out_x(4,:),'DisplayName','q_4')
         xlabel('t (min)')
-        ylabel('q_1')
-        title('X-Spin')
-        axis([0,10,-1,1])
+        ylabel('q')
+%         title('X-Spin')
+        legend()
+        axis([0,12*4,-1,1])
         hold off
         
-        subplot(4,3,2); hold on
-        plot(t_arr_min,qns_out_y(1,:),'DisplayName','y-spin')
+        figure(); hold on; grid on;
+        plot(t_arr_min,qns_out_y(1,:),'DisplayName','q_1')
+        plot(t_arr_min,qns_out_y(2,:),'DisplayName','q_2','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,qns_out_y(3,:),'DisplayName','q_3')
+        plot(t_arr_min,qns_out_y(4,:),'DisplayName','q_4')
         xlabel('t (min)')
-        ylabel('q_1')
-        title('Y-Spin')
-        axis([0,10,-1,1])
+        ylabel('q')
+%         title('Y-Spin')
+        legend()
+        axis([0,12*4,-1,1])
         hold off
         
-        subplot(4,3,3); hold on
-        plot(t_arr_min,qns_out_z(1,:),'DisplayName','z-spin')
+        figure(); hold on; grid on;
+        plot(t_arr_min,qns_out_z(1,:),'DisplayName','q_1')
+        plot(t_arr_min,qns_out_z(2,:),'DisplayName','q_2','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,qns_out_z(3,:),'DisplayName','q_3')
+        plot(t_arr_min,qns_out_z(4,:),'DisplayName','q_4')
         xlabel('t (min)')
-        ylabel('q_1')
-        title('Z-Spin')
-        axis([0,10,-1,1])
-        hold off
-        
-        % q_2
-
-        subplot(4,3,4); hold on
-        plot(t_arr_min,qns_out_x(2,:),'DisplayName','x-spin')
-        xlabel('t (min)')
-        ylabel('q_2')
-        axis([0,10,-1,1])
-        hold off
-        
-        subplot(4,3,5); hold on
-        plot(t_arr_min,qns_out_y(2,:),'DisplayName','y-spin')
-        xlabel('t (min)')
-        ylabel('q_2')
-        axis([0,10,-1,1])
-        hold off
-        
-        subplot(4,3,6); hold on
-        plot(t_arr_min,qns_out_z(2,:),'DisplayName','z-spin')
-        xlabel('t (min)')
-        ylabel('q_2')
-        axis([0,10,-1,1])
-        hold off
-        
-        % q_3
-
-        subplot(4,3,7); hold on
-        plot(t_arr_min,qns_out_x(3,:),'DisplayName','x-spin')
-        xlabel('t (min)')
-        ylabel('q_3')
-        axis([0,10,-1,1])
-        hold off
-        
-        subplot(4,3,8); hold on
-        plot(t_arr_min,qns_out_y(3,:),'DisplayName','y-spin')
-        xlabel('t (min)')
-        ylabel('q_3')
-        axis([0,10,-1,1])
-        hold off
-        
-        subplot(4,3,9); hold on
-        plot(t_arr_min,qns_out_z(3,:),'DisplayName','z-spin')
-        xlabel('t (min)')
-        ylabel('q_3')
-        axis([0,10,-1,1])
-        hold off
-        
-        % q_4
-
-        subplot(4,3,10); hold on
-        plot(t_arr_min,qns_out_x(4,:),'DisplayName','x-spin')
-        xlabel('t (min)')
-        ylabel('q_4')
-        axis([0,10,-1,1])
-        hold off
-        
-        subplot(4,3,11); hold on
-        plot(t_arr_min,qns_out_y(4,:),'DisplayName','y-spin')
-        xlabel('t (min)')
-        ylabel('q_4')
-        axis([0,10,-1,1])
-        hold off
-        
-        subplot(4,3,12); hold on
-        plot(t_arr_min,qns_out_z(4,:),'DisplayName','z-spin')
-        xlabel('t (min)')
-        ylabel('q_4')
-        axis([0,10,-1,1])
+        ylabel('q')
+%         title('Z-Spin')
+        legend()
+        axis([0,12*4,-1,1])
         hold off
 
     hold off
@@ -609,101 +423,64 @@ w_pert = -w0(3).*[.01;.01;.01];
     eulax_y = dcm2eulax(A_y);
     A_z = quat2dcm(qns_out_z);
     eulax_z = dcm2eulax(A_z);
+    
     figure(); hold on
         
-        % e_1
-        
-        subplot(4,3,1); hold on
-        plot(t_arr_min,eulax_x(1,:),'DisplayName','x-spin')
+        subplot(1,2,1); hold on; grid on;
+        plot(t_arr_min,eulax_x(1,:),'DisplayName','e_x')
+        plot(t_arr_min,eulax_x(2,:),'DisplayName','e_y')
+        plot(t_arr_min,eulax_x(3,:),'DisplayName','e_z','LineWidth',2,'LineStyle',':')
         xlabel('t (min)')
-        ylabel('e_1')
-        title('X-Spin')
-        axis([0,10,-pi,pi])
+        ylabel('e')
+        axis([0,12*4,-1,1])
+        legend()
         hold off
         
-        subplot(4,3,2); hold on
-        plot(t_arr_min,eulax_y(1,:),'DisplayName','y-spin')
+        subplot(1,2,2); hold on; grid on;
+        plot(t_arr_min,eulax_x(4,:))
         xlabel('t (min)')
-        ylabel('e_1')
-        title('Y-Spin')
-        axis([0,10,-pi,pi])
+        ylabel('\Phi (rad)')
+        axis([0,12*4,-pi,pi])
         hold off
         
-        subplot(4,3,3); hold on
-        plot(t_arr_min,eulax_z(1,:),'DisplayName','z-spin')
+    hold off
+    figure(); hold on
+        
+        subplot(1,2,1); hold on; grid on;
+        plot(t_arr_min,eulax_y(1,:),'DisplayName','e_x','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,eulax_y(2,:),'DisplayName','e_y')
+        plot(t_arr_min,eulax_y(3,:),'DisplayName','e_z')
         xlabel('t (min)')
-        ylabel('e_1')
-        title('Z-Spin')
-        axis([0,10,-pi,pi])
+        ylabel('e')
+        axis([0,12*4,-1,1])
+        legend()
         hold off
         
-        % e_2
-
-        subplot(4,3,4); hold on
-        plot(t_arr_min,eulax_x(2,:),'DisplayName','x-spin')
+        subplot(1,2,2); hold on; grid on;
+        plot(t_arr_min,eulax_y(4,:))
         xlabel('t (min)')
-        ylabel('e_2')
-        axis([0,10,-pi,pi])
+        ylabel('\Phi (rad)')
+        axis([0,12*4,-pi,pi])
         hold off
         
-        subplot(4,3,5); hold on
-        plot(t_arr_min,eulax_y(2,:),'DisplayName','y-spin')
+    hold off
+    figure(); hold on
+        
+        subplot(1,2,1); hold on; grid on;
+        plot(t_arr_min,eulax_z(1,:),'DisplayName','e_x','LineWidth',2,'LineStyle',':')
+        plot(t_arr_min,eulax_z(2,:),'DisplayName','e_y')
+        plot(t_arr_min,eulax_z(3,:),'DisplayName','e_z')
         xlabel('t (min)')
-        ylabel('e_2')
-        axis([0,10,-pi,pi])
+        ylabel('e')
+        axis([0,12*4,-1,1])
+        legend()
         hold off
         
-        subplot(4,3,6); hold on
-        plot(t_arr_min,eulax_z(2,:),'DisplayName','z-spin')
+        subplot(1,2,2); hold on; grid on;
+        plot(t_arr_min,eulax_z(4,:))
         xlabel('t (min)')
-        ylabel('e_2')
-        axis([0,10,-pi,pi])
-        hold off
-        
-        % e_3
-
-        subplot(4,3,7); hold on
-        plot(t_arr_min,eulax_x(3,:),'DisplayName','x-spin')
-        xlabel('t (min)')
-        ylabel('e_3')
-        axis([0,10,-pi,pi])
-        hold off
-        
-        subplot(4,3,8); hold on
-        plot(t_arr_min,eulax_y(3,:),'DisplayName','y-spin')
-        xlabel('t (min)')
-        ylabel('e_3')
-        axis([0,10,-pi,pi])
-        hold off
-        
-        subplot(4,3,9); hold on
-        plot(t_arr_min,eulax_z(3,:),'DisplayName','z-spin')
-        xlabel('t (min)')
-        ylabel('e_3')
-        axis([0,10,-pi,pi])
-        hold off
-        
-        % e_4
-
-        subplot(4,3,10); hold on
-        plot(t_arr_min,eulax_x(4,:),'DisplayName','x-spin')
-        xlabel('t (min)')
-        ylabel('e_4')
-        axis([0,10,-pi,pi])
-        hold off
-        
-        subplot(4,3,11); hold on
-        plot(t_arr_min,eulax_y(4,:),'DisplayName','y-spin')
-        xlabel('t (min)')
-        ylabel('e_4')
-        axis([0,10,-pi,pi])
-        hold off
-        
-        subplot(4,3,12); hold on
-        plot(t_arr_min,eulax_z(4,:),'DisplayName','z-spin')
-        xlabel('t (min)')
-        ylabel('e_4')
-        axis([0,10,-pi,pi])
+        ylabel('\Phi (rad)')
+        axis([0,12*4,-pi,pi])
         hold off
 
     hold off
