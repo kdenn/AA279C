@@ -36,7 +36,7 @@ q0 = [0; 0; 0; 1];
 % Sim time parameters
 t0 = 0; dt = 0.5; tf = visors.T*2; t_arr = (t0:dt:tf)';
 
-% {
+%{
 % Propagate angular velocity and attitude
 [w_body, quat_out] = propagate_attitude(t_arr, w0, q0);
 
@@ -118,13 +118,13 @@ view(3);
 opts = odeset('RelTol', 1e-9, 'AbsTol', 1e-9);
 [~,rv_array] = ode113(@FODEint,t_arr,[visors.r_ECI_0;visors.v_ECI_0],opts);
 N = numel(t_arr);
-DCM_ECI2RTN = zeros(3,3,N);
+R_ECI2RTN = zeros(3,3,N);
 for n = 1:N
-    DCM_ECI2RTN(:,:,n) = rotECItoRTN(visors.Om,visors.incl,visors.w,...
+    R_ECI2RTN(:,:,n) = rotECItoRTN(visors.Om,visors.incl,visors.w,...
         visors.e,rv_array(n,1:3)');
 end
 
-% {
+%{
 figure(); hold on; grid on;
 triad_inert = 30.*eye(3);
 
@@ -139,7 +139,7 @@ for i = i_indices
     DCM = quat2dcm(quat_out(:,i));
     triad_prin = DCM * triad_inert;
     triad_body = visors.A_rot' * triad_prin;
-    triad_RTN = DCM_ECI2RTN(:,:,i) * triad_inert;
+    triad_RTN = R_ECI2RTN(:,:,i) * triad_inert;
 
     % principal axes
     quiver3(0,0,0,triad_prin(1,1),triad_prin(2,1),triad_prin(3,1),...
@@ -191,7 +191,7 @@ qns_eq = [0;0;0;1]; % = dcm2quat(eye(3)); % quaterions for all eul ang = 0
 
 t_arr_min = t_arr./60;
 
-% {
+%{
 [w_out_z, qns_out_z] = propagate_attitude(t_arr, w0_z, qns_eq);
 
     % Angular Velocity
@@ -246,26 +246,27 @@ t_arr_min = t_arr./60;
     hold off
 %}
 
-w0_eq2 = DCM_ECI2RTN(:,:,1)'*[0;0;w0(3)]; % rotation only about N
-qns_eq2 = dcm2quat(DCM_ECI2RTN(:,:,1)); % quaterions for alignment to RTN
+% w0_eq2 = R_ECI2RTN(:,:,1)'*[0;0;w0(3)]; % rotation only about N
+% qns_eq2 = dcm2quat(R_ECI2RTN(:,:,1)); % quaterions for alignment to RTN
 
 % {
-[w_out_eq2, qns_out_eq2] = propagate_attitude(t_arr, w0_eq2, qns_eq2);
-w_out_eq2_rtn = zeros(size(w_out_eq2));
+[w_out_rtn, qns_out_rtn] = propagate_attitude(t_arr, w0_z, qns_eq);
+
+w_out_ijk = zeros(size(w_out_rtn));
 for n = 1:N
-    w_out_eq2_rtn(:,n) = DCM_ECI2RTN(:,:,n)*w_out_eq2(:,n);
+    w_out_ijk(:,n) = R_ECI2RTN(:,:,n)'*w_out_rtn(:,n);
 end
 
-    % Angular Velocity
-    w_max = 2*max(max(abs(w_out_eq2)));
+    %% Angular Velocity
+    w_max = 2*max(max(abs(w_out_rtn)));
     figure(); hold on; grid on;
 
-        plot(t_arr_min,w_out_eq2(1,:),'DisplayName','\omega_x ECI','Color',[0, 0.4470, 0.7410])
-        plot(t_arr_min,w_out_eq2_rtn(1,:),'DisplayName','\omega_x RTN','LineStyle',':','Color',[0, 0.4470, 0.7410])
-        plot(t_arr_min,w_out_eq2(2,:),'DisplayName','\omega_y ECI','Color',[0.8500, 0.3250, 0.0980])
-        plot(t_arr_min,w_out_eq2_rtn(2,:),'DisplayName','\omega_y RTN','LineStyle',':','Color',[0.8500, 0.3250, 0.0980])
-        plot(t_arr_min,w_out_eq2(3,:),'DisplayName','\omega_z ECI','Color',[0.9290, 0.6940, 0.1250])
-        plot(t_arr_min,w_out_eq2_rtn(3,:),'DisplayName','\omega_z RTN','LineStyle',':','Color',[0.9290, 0.6940, 0.1250])
+        plot(t_arr_min,w_out_rtn(1,:),'DisplayName','\omega_R RTN','LineWidth',2,'Color',[0, 0.4470, 0.7410])
+        plot(t_arr_min,w_out_rtn(2,:),'DisplayName','\omega_T RTN','Color',[0.9290, 0.6940, 0.1250])
+        plot(t_arr_min,w_out_rtn(3,:),'DisplayName','\omega_N RTN','Color',[0.8500, 0.3250, 0.0980])
+        plot(t_arr_min,w_out_ijk(1,:),'DisplayName','\omega_I IJK','LineStyle','--','Color',[0, 0.4470, 0.7410])
+        plot(t_arr_min,w_out_ijk(2,:),'DisplayName','\omega_J IJK','LineStyle','--','Color',[0.8500, 0.3250, 0.0980])
+        plot(t_arr_min,w_out_ijk(3,:),'DisplayName','\omega_K IJK','LineStyle','--','Color',[0.9290, 0.6940, 0.1250])
         xlabel('t (min)')
         ylabel('\omega_x (rad/s)')
         axis([0,30,-w_max,w_max])
@@ -276,10 +277,10 @@ end
     % Quaternions
     figure(); hold on; grid on;
 
-        plot(t_arr_min,qns_out_eq2(1,:),'DisplayName','q_1')
-        plot(t_arr_min,qns_out_eq2(2,:),'DisplayName','q_2')
-        plot(t_arr_min,qns_out_eq2(3,:),'DisplayName','q_3')
-        plot(t_arr_min,qns_out_eq2(4,:),'DisplayName','q_4')
+        plot(t_arr_min,qns_out_rtn(1,:),'DisplayName','q_1')
+        plot(t_arr_min,qns_out_rtn(2,:),'DisplayName','q_2')
+        plot(t_arr_min,qns_out_rtn(3,:),'DisplayName','q_3')
+        plot(t_arr_min,qns_out_rtn(4,:),'DisplayName','q_4')
         xlabel('t (min)')
         ylabel('q')
         legend('Location','southeast')
@@ -288,7 +289,7 @@ end
     hold off
 
     % Euler Angles
-    A = quat2dcm(qns_out_eq2);
+    A = quat2dcm(qns_out_rtn);
     eulax = dcm2eulax(A);
     figure(); hold on
 
@@ -312,6 +313,7 @@ end
     hold off
 %}
 
+return
 
 %% 3-6)
 %{

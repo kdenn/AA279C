@@ -3,6 +3,9 @@ function [omega_out, quat_out] = propagate_attitude(t_arr, w0, q0)
 % contained in t_arr and with initial angular velcocity w0 and initial
 % quaternion q0
 
+% Propagation happens in the principle axis frame so w0 and q0 should
+% be represented in a frame aligned with the principle axis
+
 visorsInertia;
 
 % Numerical integrator options
