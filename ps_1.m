@@ -87,18 +87,17 @@ hold off
  
 %% 1-8) Define and Plot the Orbit
  
-visorsOrbit
+visors = visorsStruct();
 
 % ECI propagation
-[r,v] = ConvOEtoRV(oe,mu);
 opts = odeset('abstol', 1e-3, 'reltol', 1e-3);
-[t_array,rv_array] = ode113(@FODEint,0:30:(2*T),[r;v],opts);
+[t_array,rv_array] = ode113(@FODEint,0:30:(2*visors.T),[visors.r_ECI_0;visors.v_ECI_0],opts);
 
 % ECEF
-JD_array = t_array./86400 + JD_epoch;
+JD_array = t_array./86400 + visors.JD_epoch;
 r_ECEF = zeros(size(rv_array,1),3);
 for i = 1:numel(JD_array)
-    R_ECItoECEF = rotECItoECEF(JD2GMST(JD_array(i)));
+    R_ECItoECEF = rotECItoECEF(deg2rad(JD2GMST(JD_array(i))));
     r_ECEF(i,1:3) = (R_ECItoECEF*rv_array(i,1:3)')';
 end
 
