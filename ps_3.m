@@ -143,25 +143,25 @@ for i = i_indices
 
     % principal axes
     quiver3(0,0,0,triad_prin(1,1),triad_prin(2,1),triad_prin(3,1),...
-        'Color', [1 transp_i(i) transp_i(i)],'LineWidth',2,'DisplayName','X-Principle');
+        'Color', [1 transp_i(i) transp_i(i)], 'LineStyle', '-', 'LineWidth',2,'DisplayName','X-Principle');
     quiver3(0,0,0,triad_prin(1,2),triad_prin(2,2),triad_prin(3,2),...
-        'Color', [transp_i(i) 1 transp_i(i)],'LineWidth',2,'DisplayName','Y-Principle');
+        'Color', [1 transp_i(i) transp_i(i)], 'LineStyle', '--', 'LineWidth',2,'DisplayName','Y-Principle');
     quiver3(0,0,0,triad_prin(1,3),triad_prin(2,3),triad_prin(3,3),...
-        'Color', [transp_i(i) transp_i(i) 1],'LineWidth',2,'DisplayName','Z-Principle');
+        'Color', [1 transp_i(i) transp_i(i)], 'LineStyle', ':', 'LineWidth',2,'DisplayName','Z-Principle');
 
     % body axes
     quiver3(0,0,0,triad_body(1,1),triad_body(2,1),triad_body(3,1),...
-        'Color', [1 transp_i(i) transp_i(i)], 'LineStyle', '--', 'LineWidth',2,'DisplayName','X-Body')
+        'Color', [transp_i(i) 1 transp_i(i)], 'LineStyle', '-', 'LineWidth',2,'DisplayName','X-Body')
     quiver3(0,0,0,triad_body(1,2),triad_body(2,2),triad_body(3,2),...
         'Color', [transp_i(i) 1 transp_i(i)], 'LineStyle', '--', 'LineWidth',2,'DisplayName','Y-Body')
     quiver3(0,0,0,triad_body(1,3),triad_body(2,3),triad_body(3,3),...
-        'Color', [transp_i(i) transp_i(i) 1], 'LineStyle', '--', 'LineWidth',2,'DisplayName','Z-Body')
+        'Color', [transp_i(i) 1 transp_i(i)], 'LineStyle', ':', 'LineWidth',2,'DisplayName','Z-Body')
     
     % RTN axes
     quiver3(0,0,0,triad_RTN(1,1),triad_RTN(2,1),triad_RTN(3,1),...
-        'Color', [1 transp_i(i) transp_i(i)], 'LineStyle', ':', 'LineWidth',2,'DisplayName','R')
+        'Color', [transp_i(i) transp_i(i) 1], 'LineStyle', '-', 'LineWidth',2,'DisplayName','R')
     quiver3(0,0,0,triad_RTN(1,2),triad_RTN(2,2),triad_RTN(3,2),...
-        'Color', [transp_i(i) 1 transp_i(i)], 'LineStyle', ':', 'LineWidth',2,'DisplayName','T')
+        'Color', [transp_i(i) transp_i(i) 1], 'LineStyle', '--', 'LineWidth',2,'DisplayName','T')
     quiver3(0,0,0,triad_RTN(1,3),triad_RTN(2,3),triad_RTN(3,3),...
         'Color', [transp_i(i) transp_i(i) 1], 'LineStyle', ':', 'LineWidth',2,'DisplayName','N')
 
