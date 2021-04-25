@@ -58,6 +58,49 @@ legend(); axis([0 12 -1 1]);
 hold off
 %}
 
+%{
+% Initial Conditions
+w0 = deg2rad([-3;2;1]);
+alpha0 = [0.1; 0.1; 0.1];
+DCM0 = eulerangle2dcm(alpha0);
+q0 = dcm2quat(DCM0);
+
+% Sim time parameters
+t0 = 0; dt = 0.5; tf = 12*60; t_arr = (t0:dt:tf)';
+
+% Propagate angular velocity and attitude
+[w_body, quat_out] = propagate_attitude(t_arr, w0, q0);
+[w_body, alpha_out] = propagate_attitude_Eul_ang(t_arr, w0, alpha0);
+
+% compare = [];
+% for i =1:length(t_arr)
+%     compare = [compare dcm2eulerangles(quat2dcm(quat_out(:,i)))];
+% end
+% figure(); hold on; grid on;
+% plot(t_arr'./60, compare(1,:), 'DisplayName', '\theta');
+% plot(t_arr'./60, compare(2,:), 'DisplayName', '\phi');
+% plot(t_arr'./60, compare(3,:), 'DisplayName', '\psi');
+% xlabel('t (min)'); ylabel('Euler Angles (rad)'); 
+% legend();
+
+figure(); 
+subplot(1,2,1); hold on; grid on;
+plot(t_arr'./60, quat_out(1,:), 'DisplayName', 'q_1');
+plot(t_arr'./60, quat_out(2,:), 'DisplayName', 'q_2');
+plot(t_arr'./60, quat_out(3,:), 'DisplayName', 'q_3');
+plot(t_arr'./60, quat_out(4,:), 'DisplayName', 'q_4');
+xlabel('t (min)'); ylabel('Quaternion'); 
+legend(); axis([0 12 -1 1]);
+
+subplot(1,2,2); hold on; grid on;
+plot(t_arr'./60, alpha_out(2,:), 'DisplayName', '\theta');
+plot(t_arr'./60, alpha_out(1,:), 'DisplayName', '\phi');
+plot(t_arr'./60, alpha_out(3,:), 'DisplayName', '\psi');
+xlabel('t (min)'); ylabel('Euler Angles (rad)'); 
+legend();
+%}
+
+
 %% 3-4)
 %{
 Since inertial position, velocity, and attitude, are known at the same time throughout the simulation, it is
