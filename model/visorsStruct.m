@@ -18,7 +18,7 @@ function visors = visorsStruct()
     [rECI,vECI,rPQW,vPQW,nu] = OEtoRVv2(visors.e,visors.incl,visors.Om,visors.w,visors.M_0,visors.n,...
     visors.mu);
 
-    visors.r_ECI_0 = rECI;
+    visors.r_ECI_0 = rECI; % (m)
     visors.v_ECI_0 = vECI;
     visors.r_PQW_0 = rPQW;
     visors.v_PQW_0 = vPQW;
