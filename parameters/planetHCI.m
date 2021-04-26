@@ -1,4 +1,4 @@
-function [rHCI, vHCI] = planetHCI(p, JD)
+function [rHCI, vHCI, oe] = planetHCI(p, JD)
 % Returns Heliocentric position and velocity of the given planet
 % INPUT:
 %   p: planet number, 1-8 (1 being Mercury, 8 being Neptune)
@@ -42,4 +42,5 @@ M_0 = L - w_bar; % mean anomaly [rad]
 %% Get r and v
 n = sqrt(mu_sun/a^3);
 M = mod(M_0,2*pi); % mod(M_0+n*(t-t_0),2*pi);
+oe = [a,e,i,Om,w,M_0];
 [rHCI,vHCI] = OEtoRVv2(e,i,Om,w,M,n,mu_sun);
