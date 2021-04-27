@@ -113,6 +113,7 @@ t_arr_min = t_arr./60;
     hold off
     
 %% Stability Tests
+
 w0_x = [wz0;0;0;wr0]; % rotation only about inertial x
 w0_y = [0;wz0;0;wr0]; % rotation only about inertial y
 w0_z = [0;0;wz0;wr0]; % rotation only about inertial z
@@ -132,7 +133,7 @@ xlabel('t (min)')
 ylabel('\omega (rad/s)')
 axis([0,12*4,-0.03,0.03])
 legend()
-title('X-Spin')
+%title('X-Spin')
 hold off
 
 figure(); hold on; grid on;
@@ -143,7 +144,7 @@ xlabel('t (min)')
 ylabel('\omega (rad/s)')
 axis([0,12*4,-0.03,0.03])
 legend()
-title('Y-Spin')
+%title('Y-Spin')
 hold off
 
 figure(); hold on; grid on;
@@ -156,3 +157,80 @@ axis([0,12*4,-0.03,0.03])
 legend()
 %title('Z-Spin')
 hold off
+
+
+%% 1e) Make rotation about another axis stable (Sun-pointing body X axis)
+
+visors = visorsStruct();
+
+% Initial Conditions
+%wz0 = deg2rad(1);
+wr0 = deg2rad(360);
+w0 = [-0.751477370342678*visors.n; -0.659758866452625*visors.n; 0; wr0];
+q0 = dcm2quat(visors.A_rot); % q0 = [0; 0; 0; 1];
+
+% Rotor initial conditions
+Ir = 3 * (0.5 * .13 * 0.042^2); % assuming 3 reaction wheels
+r_rot = [-0.751477370342678; -0.659758866452625; 0]; % 1a-c: [0;0;1];  1d: [0;1;0];
+
+% Sim time parameters
+t0 = 0; dt = 0.5; tf = visors.T*2*pi; t_arr = (t0:dt:tf)';
+
+% Propagate angular velocity and attitude
+w_perturb = (visors.n / 10) .* [1;1;1;0];
+[w_princ, quat_out] = propagate_attitude_rotor(t_arr, w0+w_perturb, q0, Ir, r_rot);
+
+w_body = zeros(4, length(w_princ));
+w_body(4,:) = w_princ(4,:);
+for i = 1:length(w_princ)
+    w_body(1:3,i) = visors.A_rot' *  w_princ(1:3,i);
+end
+
+plot_attitude_3D(visors, quat_out);
+
+function return_flag = plot_attitude_3D(visors, quat_out)
+
+triad_inert = 1.*eye(3);
+x_prin = zeros(3,length(quat_out));
+y_prin = zeros(3,length(quat_out));
+z_prin = zeros(3,length(quat_out));
+x_body = zeros(3,length(quat_out));
+y_body = zeros(3,length(quat_out));
+z_body = zeros(3,length(quat_out));
+for i = 1:length(quat_out)
+    DCM = quat2dcm(quat_out(:,i));
+    triad_prin = DCM * triad_inert;
+    triad_body = visors.A_rot' * triad_prin;
+    
+    x_prin(:,i) = triad_prin(:,1);
+    y_prin(:,i) = triad_prin(:,2);
+    z_prin(:,i) = triad_prin(:,3);
+    x_body(:,i) = triad_body(:,1);
+    y_body(:,i) = triad_body(:,2);
+    z_body(:,i) = triad_body(:,3);
+end
+
+figure(); hold on; grid on;
+plot3(x_prin(1,:), x_prin(2,:), x_prin(3,:), 'r:', 'DisplayName', 'X Axis', 'LineWidth', 2);
+plot3(y_prin(1,:), y_prin(2,:), y_prin(3,:), 'g-.', 'DisplayName', 'Y Axis');
+plot3(z_prin(1,:), z_prin(2,:), z_prin(3,:), 'b-.', 'DisplayName', 'Z Axis');
+quiver3(0,0,0,x_prin(1,1), x_prin(2,1), x_prin(3,1), 'r', 'AutoScaleFactor', 1, 'DisplayName', 'X Initial');
+quiver3(0,0,0,y_prin(1,1), y_prin(2,1), y_prin(3,1), 'g', 'AutoScaleFactor', 1, 'DisplayName', 'Y Initial');
+quiver3(0,0,0,z_prin(1,1), z_prin(2,1), z_prin(3,1), 'b', 'AutoScaleFactor', 1, 'DisplayName', 'Z Initial');
+xlabel('Inertial I'); ylabel('Inertial J'); zlabel('Inertial K');
+title('Orientation of Principal Axes (wrt Inertial) over Time');
+view(3); legend(); axis equal;
+
+figure(); hold on; grid on;
+plot3(x_body(1,:), x_body(2,:), x_body(3,:), 'r:', 'DisplayName', 'X Axis', 'LineWidth', 2);
+plot3(y_body(1,:), y_body(2,:), y_body(3,:), 'g-.', 'DisplayName', 'Y Axis');
+plot3(z_body(1,:), z_body(2,:), z_body(3,:), 'b-.', 'DisplayName', 'Z Axis');
+quiver3(0,0,0,x_body(1,1), x_body(2,1), x_body(3,1), 'r', 'AutoScaleFactor', 1, 'DisplayName', 'X Initial');
+quiver3(0,0,0,y_body(1,1), y_body(2,1), y_body(3,1), 'g', 'AutoScaleFactor', 1, 'DisplayName', 'Y Initial');
+quiver3(0,0,0,z_body(1,1), z_body(2,1), z_body(3,1), 'b', 'AutoScaleFactor', 1, 'DisplayName', 'Z Initial');
+xlabel('Inertial I'); ylabel('Inertial J'); zlabel('Inertial K');
+title('Orientation of Body Axes (wrt Inertial) over Time');
+view(3); legend(); axis equal;
+
+return_flag = 1;
+end
