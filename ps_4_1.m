@@ -113,6 +113,7 @@ t_arr_min = t_arr./60;
     hold off
     
 %% Stability Tests
+
 w0_x = [wz0;0;0;wr0]; % rotation only about inertial x
 w0_y = [0;wz0;0;wr0]; % rotation only about inertial y
 w0_z = [0;0;wz0;wr0]; % rotation only about inertial z
@@ -132,7 +133,7 @@ xlabel('t (min)')
 ylabel('\omega (rad/s)')
 axis([0,12*4,-0.03,0.03])
 legend()
-title('X-Spin')
+%title('X-Spin')
 hold off
 
 figure(); hold on; grid on;
@@ -143,7 +144,7 @@ xlabel('t (min)')
 ylabel('\omega (rad/s)')
 axis([0,12*4,-0.03,0.03])
 legend()
-title('Y-Spin')
+%title('Y-Spin')
 hold off
 
 figure(); hold on; grid on;
@@ -156,3 +157,34 @@ axis([0,12*4,-0.03,0.03])
 legend()
 %title('Z-Spin')
 hold off
+
+
+%% 1e) Make rotation about another axis stable (Sun-pointing body X axis)
+
+visors = visorsStruct();
+
+% Initial Conditions
+%wz0 = deg2rad(1);
+wr0 = deg2rad(360);
+w0 = [-0.751477370342678*visors.n; -0.659758866452625*visors.n; 0; wr0];
+q0 = dcm2quat(visors.A_rot); % q0 = [0; 0; 0; 1];
+
+% Rotor initial conditions
+Ir = 3 * (0.5 * .13 * 0.042^2); % assuming 3 reaction wheels
+r_rot = [-0.751477370342678; -0.659758866452625; 0]; % 1a-c: [0;0;1];  1d: [0;1;0];
+
+% Sim time parameters
+t0 = 0; dt = 0.5; tf = visors.T*2*pi; t_arr = (t0:dt:tf)';
+
+% Propagate angular velocity and attitude
+w_perturb = (visors.n / 10) .* [1;1;1;0];
+[w_princ, quat_out] = propagate_attitude_rotor(t_arr, w0+w_perturb, q0, Ir, r_rot);
+
+w_body = zeros(4, length(w_princ));
+w_body(4,:) = w_princ(4,:);
+for i = 1:length(w_princ)
+    w_body(1:3,i) = visors.A_rot' *  w_princ(1:3,i);
+end
+
+plot_attitude_3D(visors, quat_out);
+
