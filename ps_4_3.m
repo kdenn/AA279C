@@ -2,6 +2,8 @@
 % Joshua Geiser
 
 clear all; close all; clc;
+visors = visorsStruct();
+colors = DefaultColors();
 
 %% 3a) Gravity Gradient Torque (Stability)
 %{
@@ -9,7 +11,7 @@ Calculate the coefficients Ki of the moments of inertia which drive stability un
 Compute and plot regions of stable and unstable motion similar to the picture below:
 %}
 
-visors = visorsStruct();
+%{
 Ix = visors.Ix; Iy = visors.Iy; Iz = visors.Iz;
 
 N = 500;
@@ -58,10 +60,9 @@ patch([kt_2_arr(kt_2_arr<(-1/3)) (-1/3) -1], ...
 patch([kt_2_arr((-1/3)<kt_2_arr & kt_2_arr<xc) kt_1_arr(xc<kt_1_arr & kt_1_arr<0) 0], ...
     [kr_2_arr((-1/3)<kt_2_arr & kt_2_arr<xc) kr_1_arr(xc<kt_1_arr & kt_1_arr<0) 0], ...
     'y', 'FaceAlpha', 0.75);
+%}
 
 %% 4-3-c
-visors = visorsStruct();
-colors = DefaultColors();
 
 % Sim time parameters
 t0 = 0; dt = 1; tf = visors.T*4; t_arr = (t0:dt:tf)';
@@ -70,9 +71,11 @@ t0 = 0; dt = 1; tf = visors.T*4; t_arr = (t0:dt:tf)';
 w0_sun = visors.A_rot*[visors.n;0;0]; % spin about x-body
 q0_sun = dcm2quat(visors.A_rot); % body/ECI -> princ
 
-% Stable??
-w0_stable = [visors.n;0;0];
-q0_stable = [0;0;0;1];
+% Align Ix with R
+rv0 = [visors.r_ECI_0;visors.v_ECI_0];
+R_ECI2RTN = rotECItoRTN(visors.Om,visors.incl,visors.w,visors.e,rv0(1:3));
+w0_stable = [0;0;visors.n]; % princ
+q0_stable = dcm2quat(R_ECI2RTN); % ECI -> princ
 
 w_pert = 0.01*visors.n*ones(3,1); % 1 percent of the value
 
@@ -82,7 +85,24 @@ w_pert = 0.01*visors.n*ones(3,1); % 1 percent of the value
 [w_body_s, quat_out_s, rv_ECI_out_s, M_out_s] = propagate_attitude(t_arr, w0_stable+w_pert, q0_stable, 1);
 [w_body, quat_out, rv_ECI_out, M_out] = propagate_attitude(t_arr, w0_sun+w_pert, q0_sun, 1);
 
+
 %%
+figure(); hold on; grid on;
+plot(t_arr'./60, M_out(1,:), 'DisplayName', 'M_x sun');
+plot(t_arr'./60, M_out(2,:), 'DisplayName', 'M_y sun');
+plot(t_arr'./60, M_out(3,:), 'DisplayName', 'M_z sun');
+legend();
+set(gcf, 'Position',  [100, 100, 600, 200]);
+hold off
+
+figure(); hold on; grid on;
+plot(t_arr'./60, M_out_s(1,:), 'DisplayName', 'M_x RTN');
+plot(t_arr'./60, M_out_s(2,:), 'DisplayName', 'M_y RTN');
+plot(t_arr'./60, M_out_s(3,:), 'DisplayName', 'M_z RTN');
+legend();
+set(gcf, 'Position',  [100, 100, 600, 200]);
+hold off
+
 figure(); hold on; grid on;
 plot(t_arr'./60, quat_out(1,:), 'DisplayName', 'q_1 sun','LineStyle','-','Color',colors(1,:));
 plot(t_arr'./60, quat_out(2,:), 'DisplayName', 'q_2 sun','LineStyle','-','Color',colors(2,:));
@@ -90,17 +110,17 @@ plot(t_arr'./60, quat_out(3,:), 'DisplayName', 'q_3 sun','LineStyle','-','Color'
 plot(t_arr'./60, quat_out(4,:), 'DisplayName', 'q_4 sun','LineStyle','-','Color',colors(4,:));
 xlabel('t (min)'); ylabel('q'); 
 legend(); 
-set(gcf, 'Position',  [100, 100, 800, 300]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 
 figure(); hold on; grid on;
-plot(t_arr'./60, quat_out_s(1,:), 'DisplayName', 'q_1 stable','LineStyle','-','Color',colors(1,:));
-plot(t_arr'./60, quat_out_s(2,:), 'DisplayName', 'q_2 stable','LineStyle','-','Color',colors(2,:));
-plot(t_arr'./60, quat_out_s(3,:), 'DisplayName', 'q_3 stable','LineStyle','-','Color',colors(3,:));
-plot(t_arr'./60, quat_out_s(4,:), 'DisplayName', 'q_4 stable','LineStyle','-','Color',colors(4,:));
+plot(t_arr'./60, quat_out_s(1,:), 'DisplayName', 'q_1 RTN','LineStyle','-','Color',colors(1,:));
+plot(t_arr'./60, quat_out_s(2,:), 'DisplayName', 'q_2 RTN','LineStyle','-','Color',colors(2,:));
+plot(t_arr'./60, quat_out_s(3,:), 'DisplayName', 'q_3 RTN','LineStyle','-','Color',colors(3,:));
+plot(t_arr'./60, quat_out_s(4,:), 'DisplayName', 'q_4 RTN','LineStyle','-','Color',colors(4,:));
 xlabel('t (min)'); ylabel('q'); 
 legend(); 
-set(gcf, 'Position',  [100, 100, 800, 300]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 
 %}
