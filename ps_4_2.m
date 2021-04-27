@@ -49,7 +49,7 @@ w0 = [0;0;visors.n]; % princ
 q0 = dcm2quat(R_ECI2RTN); % ECI -> princ
 
 % Propagate angular velocity and attitude
-%{
+% {
 [w_body, quat_out, rv_ECI_out, M_out] = propagate_attitude(t_arr, w0, q0, 0);
 [w_body_g, quat_out_g, rv_ECI_out_g, M_out_g] = propagate_attitude(t_arr, w0, q0, 1);
 
@@ -69,11 +69,11 @@ plot(t_arr'./60, q_RTN(3,:), 'DisplayName', 'q_3');
 plot(t_arr'./60, q_RTN(4,:), 'DisplayName', 'q_4');
 xlabel('t (min)'); ylabel('q'); 
 legend(); 
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 %}
 
-% {
+%{
 figure(); hold on; grid on;
 plot(t_arr'./60, w_body(1,:), 'DisplayName', '\omega_x no grav','LineStyle','-','Color',colors(1,:));
 plot(t_arr'./60, w_body(2,:), 'DisplayName', '\omega_y no grav','LineStyle','-','Color',colors(2,:));
@@ -83,7 +83,7 @@ plot(t_arr'./60, w_body_g(2,:), 'DisplayName', '\omega_y','LineStyle','--','Colo
 plot(t_arr'./60, w_body_g(3,:), 'DisplayName', '\omega_z','LineStyle','--','Color',colors(3,:));
 xlabel('t (min)'); ylabel('\omega (rad/s)');
 legend();
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 
 figure(); hold on; grid on;
@@ -97,7 +97,7 @@ plot(t_arr'./60, quat_out_g(3,:), 'DisplayName', 'q_3','LineStyle','--','Color',
 plot(t_arr'./60, quat_out_g(4,:), 'DisplayName', 'q_4','LineStyle','--','Color',colors(4,:));
 xlabel('t (min)'); ylabel('q'); 
 legend(); 
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 
 figure(); hold on; grid on;
@@ -105,7 +105,7 @@ plot(t_arr'./60, M_out_g(1,:), 'DisplayName', 'M_x');
 plot(t_arr'./60, M_out_g(2,:), 'DisplayName', 'M_y');
 plot(t_arr'./60, M_out_g(3,:), 'DisplayName', 'M_z');
 legend();
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 
 figure(); hold on; grid on;
@@ -114,7 +114,7 @@ plot(t_arr'./60, w_body(2,:)-w_body_g(2,:), 'DisplayName', '\delta \omega_y');
 plot(t_arr'./60, w_body(3,:)-w_body_g(3,:), 'DisplayName', '\delta \omega_z');
 xlabel('t (min)'); ylabel('\delta \omega (rad/s)');
 legend();
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 
 figure(); hold on; grid on;
@@ -124,8 +124,10 @@ plot(t_arr'./60, quat_out(3,:)-quat_out_g(3,:), 'DisplayName', '\delta q_3');
 plot(t_arr'./60, quat_out(4,:)-quat_out_g(4,:), 'DisplayName', '\delta q_4');
 xlabel('t (min)'); ylabel('\delta q'); 
 legend(); 
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
+
+return
 %}
 
 %% 4-2-e)
@@ -163,7 +165,7 @@ plot(t_arr'./60, w_body_g(2,:), 'DisplayName', '\omega_y','LineStyle','--','Colo
 plot(t_arr'./60, w_body_g(3,:), 'DisplayName', '\omega_z','LineStyle','--','Color',colors(3,:));
 xlabel('t (min)'); ylabel('\omega (rad/s)');
 legend();
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 
 figure(); hold on; grid on;
@@ -177,7 +179,7 @@ plot(t_arr'./60, quat_out_g(3,:), 'DisplayName', 'q_3','LineStyle','--','Color',
 plot(t_arr'./60, quat_out_g(4,:), 'DisplayName', 'q_4','LineStyle','--','Color',colors(4,:));
 xlabel('t (min)'); ylabel('q'); 
 legend(); 
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 
 figure(); hold on; grid on;
@@ -185,7 +187,7 @@ plot(t_arr'./60, M_out_g(1,:), 'DisplayName', 'M_x');
 plot(t_arr'./60, M_out_g(2,:), 'DisplayName', 'M_y');
 plot(t_arr'./60, M_out_g(3,:), 'DisplayName', 'M_z');
 legend();
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 
 figure(); hold on; grid on;
@@ -194,7 +196,7 @@ plot(t_arr'./60, w_body(2,:)-w_body_g(2,:), 'DisplayName', '\delta\omega_y');
 plot(t_arr'./60, w_body(3,:)-w_body_g(3,:), 'DisplayName', '\delta\omega_z');
 xlabel('t (min)'); ylabel('\delta\omega (rad/s)');
 legend();
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 
 figure(); hold on; grid on;
@@ -204,7 +206,7 @@ plot(t_arr'./60, quat_out(3,:)-quat_out_g(3,:), 'DisplayName', '\delta q_3');
 plot(t_arr'./60, quat_out(4,:)-quat_out_g(4,:), 'DisplayName', '\delta q_4');
 xlabel('t (min)'); ylabel('\delta q'); 
 legend(); 
-set(gcf, 'Position',  [100, 100, 1200, 400]);
+set(gcf, 'Position',  [100, 100, 600, 200]);
 hold off
 %}
 
