@@ -1,4 +1,5 @@
 % Faces and Vertices of the Visors model
+R_body = R2(-pi/2)*R3(-pi/2);
 
 %% 6U Bus
 d = 10; % side length (cm)
@@ -18,6 +19,8 @@ v_bus = [ 1 -0.5 -1.5;
          -1  0.5  1.5;
           1  0.5  1.5;
           1 -0.5  1.5].*d;
+
+v_bus = (R_body*v_bus')';
 
 %% Solar Panels
 s = 20; % width of solar panel section (cm)
@@ -43,6 +46,9 @@ v_45 = (R2(pi/2)*v_base')';
 body_offset = repmat([0 0 1.5*d],[8,1]);
 v_pan_1 = v_45 + body_offset;
 v_pan_2 = (R2(pi)*v_pan_1')';
+
+v_pan_1 = (R_body*v_pan_1')';
+v_pan_2 = (R_body*v_pan_2')';
 
 v_pan_cen = v_base - repmat([s*1.5 0 0],[8,1]);
 
