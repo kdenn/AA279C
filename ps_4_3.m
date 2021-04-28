@@ -12,8 +12,6 @@ Compute and plot regions of stable and unstable motion similar to the picture be
 %}
 
 %{
-Ix = visors.Ix; Iy = visors.Iy; Iz = visors.Iz;
-
 N = 500;
 
 kt_1_arr = linspace(-1,1,N);
@@ -30,6 +28,12 @@ end
 
 %%
 figure(); hold on; grid on;
+
+% For nominal configuration
+Ix = visors.Ix; Iy = visors.Iy; Iz = visors.Iz;
+
+% For second configuration only
+%Ix = 0.0536; Iy = 0.3421; Iz = 0.3775;
 
 visors_kt = (Iz-Ix)/Iy;
 visors_kr = (Iz-Iy)/Ix;
