@@ -8,7 +8,7 @@ clear all; close all; clc;
     In addition to gravity gradient, program perturbation torques due to
     magnetic field, solar radiation pressure, and  atmospheric  drag. Note
     1: You  can  apply  a  very  minimal/basic  model  for  perturbations
-    that are  not  relevant (negligible) to your project.Note 2: All
+    that are  not  relevant (negligible) to your project. Note 2: All
     perturbations can be grouped into a single large subsystem called
     environment or similar whose output feed the Euler equations. Note 3:
     Re-use as many functions as possible for solar radiation pressure and
