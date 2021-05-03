@@ -1,4 +1,4 @@
-function [omega_out, quat_out, rv_ECI_out, M_out] = propagate_attitude(t_arr, w0, q0, flags)
+function [omega_out, quat_out, rv_ECI_out, M_out] = propagate_attitude(t_arr, w0, q0, flags, vsr)
 % Propagate angular velocity and quaternion according to timesteps
 % contained in t_arr and with initial angular velcocity w0 and initial
 % quaternion q0
@@ -11,9 +11,11 @@ function [omega_out, quat_out, rv_ECI_out, M_out] = propagate_attitude(t_arr, w0
 
 % If you want gravity gradient, q0 needs to be ECI > princ
 
-vsr = visorsStruct();
 if nargin ==  3
     flags = zeros(1,1);
+    vsr = visorsStruct();
+elseif nargin == 4
+    vsr = visorsStruct();
 end
 
 flag_grav = flags(1);

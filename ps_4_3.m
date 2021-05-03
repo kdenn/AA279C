@@ -67,6 +67,7 @@ patch([kt_2_arr((-1/3)<kt_2_arr & kt_2_arr<xc) kt_1_arr(xc<kt_1_arr & kt_1_arr<0
 %}
 
 %% 4-3-c
+Ix = 0.0536; Iy = 0.3421; Iz = 0.3775;
 
 % Sim time parameters
 t0 = 0; dt = 1; tf = visors.T*4; t_arr = (t0:dt:tf)';
@@ -86,7 +87,11 @@ w_pert = 0.01*visors.n*ones(3,1); % 1 percent of the value
 %%
 % {
 % Propagate angular velocity and attitude
-[w_body_s, quat_out_s, rv_ECI_out_s, M_out_s] = propagate_attitude(t_arr, w0_stable+w_pert, q0_stable, 1);
+visors_s = visors;
+visors_s.Ix = Ix; visors_s.Iy = Iy; visors_s.Iy = Iy; 
+visors_s.I_princ = diag([Ix,Iy,Iz]);
+visors_s.A_rot = eye(3);
+[w_body_s, quat_out_s, rv_ECI_out_s, M_out_s] = propagate_attitude(t_arr, w0_stable+w_pert, q0_stable, 1, visors_s);
 [w_body, quat_out, rv_ECI_out, M_out] = propagate_attitude(t_arr, w0_sun+w_pert, q0_sun, 1);
 
 
