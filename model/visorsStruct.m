@@ -53,5 +53,12 @@ function visors = visorsStruct()
     end
     visors.com_princ = A_rot*visors.com_body;
     
+    % Get data on barycenter, area, & norm of each face in a single struct
+    faces = struct();
+    faces.bary = [bary_bus; bary_pan_1; bary_pan_2] ./ 100;
+    faces.area = [area_bus; area_pan_1; area_pan_2] ./ (100^2);
+    faces.norm = [norm_bus; norm_pan_1; norm_pan_2];
+    faces.N = length(faces.area); % number of faces (should be 18)
+    visors.faces = faces;
 
 end
