@@ -9,7 +9,7 @@ function B = magnetic_field(k,r_ECI,JD)
     
     r = norm(r_ECI); % geocentric distance to the spacecraft
     a = s3_constants('R_EARTH_WGS84'); % equatorial radius of Earth
-    GC = ECItoGC(rECI,JD);
+    GC = ECItoGC(r_ECI,JD);
     GD = GCtoGD(GC,1E-9,100);
     phi = deg2rad(GD(2));
     theta = deg2rad(90 - GD(1));
