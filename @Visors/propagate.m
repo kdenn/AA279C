@@ -52,15 +52,8 @@ for i = 1:N-1
     
     % Get environmental torques
     JD_curr = obj.ICs.JD_epoch + (t_arr(i)/86400); 
-    env_torques = get_env_torques(obj.ICs, JD_curr, rv0(1:3), rv0(4:6), q0);
-    if all(flags)
-        M0 = env_torques.all;
-    else
-        M0 = flags(1)*env_torques.grav + ...
-             flags(2)*env_torques.srp + ...
-             flags(3)*env_torques.drag + ...
-             flags(4)*env_torques.mag;
-    end
+    env_torques = get_env_torques(obj.ICs, JD_curr, rv0(1:3), rv0(4:6), q0, flags);
+    M0 = env_torques.all;
     
     % Update environmental torques output variable
     M_out(:,i+1,1) = env_torques.grav;
