@@ -27,8 +27,7 @@ classdef Visors < handle
                 
                 % Get current Sun direction in ECI frame
                 JD = obj.ICs.JD_epoch + (t_arr(i)/86400);
-                SUN_HAT_ECI = s3_em_thirdbody_sun(JD);
-                SUN_HAT_ECI = SUN_HAT_ECI ./ norm(SUN_HAT_ECI);
+                SUN_HAT_ECI = unitVec(get_sun_position(JD));
                 
                 % Complete triad of sun frame
                 Z_HAT = [0;0;1] - SUN_HAT_ECI(3)*SUN_HAT_ECI;
