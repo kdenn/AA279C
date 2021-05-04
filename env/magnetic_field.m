@@ -31,9 +31,9 @@ function B = magnetic_field(k,r_ECI,JD)
         Cp = 0;
         for m = 0:n
             mi = m+1; % adjust for 1-based indexing
-            Cr = Cr + (gs(ni,mi)*cos(m*phi) + hs*sin(m*phi))*P(ni,mi);
-            Ct = Ct + (gs(ni,mi)*cos(m*phi) + hs*sin(m*phi))*dP(ni,mi);
-            Cp = Cp + (-gs(ni,mi)*cos(m*phi) + hs*sin(m*phi))*P(ni,mi);
+            Cr = Cr + (gs(ni,mi)*cos(m*phi) + hs(ni,mi)*sin(m*phi))*P(ni,mi);
+            Ct = Ct + (gs(ni,mi)*cos(m*phi) + hs(ni,mi)*sin(m*phi))*dP(ni,mi);
+            Cp = Cp + (-gs(ni,mi)*cos(m*phi) + hs(ni,mi)*sin(m*phi))*P(ni,mi);
         end
         Br = Br + (a/r)^(n+2)*(n+1)*Cr;
         Bt = Bt + (a/r)^(n+2)*Ct;
@@ -103,9 +103,9 @@ function S = schmidt(k)
     for n = 1:k
         ni = n+1;
         S(ni,1) = S(ni-1,1)*((2*n-1)/n);
-        for m = 1:(n-1)
+        for m = 1:n
             mi = m+1;
-            S(ni,mi) = S(ni,mi-1)*sqrt((n-m+1)*(kroneckerDelta(m,1)+1)/(n+m));
+            S(ni,mi) = S(ni,mi-1)*sqrt((n-m+1)*((m==1)+1)/(n+m));
         end
     end
 
@@ -118,9 +118,13 @@ function dP = d_gauss_funs(P,k,theta)
     for n = 1:k
         ni = n+1;
         dP(ni,ni) = sin(theta)*dP(ni-1,ni-1) + cos(theta)*P(ni-1,ni-1);
-        for m = 1:(n-1)
+        for m = 0:(n-1)
             mi = m+1;
-            P(ni,mi) = cos(theta)*dP(ni-1,mi) - sin(theta)*P(ni-1,mi) - get_K(n,m)*dP(ni-2,mi);
+            if n ==1
+                P(ni,mi) = cos(theta)*dP(ni-1,mi) - sin(theta)*P(ni-1,mi);
+            else
+                P(ni,mi) = cos(theta)*dP(ni-1,mi) - sin(theta)*P(ni-1,mi) - get_K(n,m)*dP(ni-2,mi);
+            end
         end
     end
 
@@ -131,9 +135,15 @@ function P = gauss_funs(k,theta)
 
     P = ones(k+1);
     for n = 1:k
+        ni = n+1;
         P(ni,ni) = sin(theta) * P(ni-1,ni-1);
-        for m = 1:(n-1)
-            P(ni,mi) = cos(theta)*P(ni-1,mi) - get_K(n,m)*P(ni-2,mi);
+        for m = 0:(n-1)
+            mi = m+1;
+            if n == 1
+                P(ni,mi) = cos(theta)*P(ni-1,mi);
+            else
+                P(ni,mi) = cos(theta)*P(ni-1,mi) - get_K(n,m)*P(ni-2,mi);
+            end
         end
     end
     
