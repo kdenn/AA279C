@@ -1,4 +1,4 @@
-function [omega_out, quat_out, rv_ECI_out, M_out] = propagate(obj, t_arr)
+function [omega_out, quat_out, rv_ECI_out, M_out] = propagate(obj, t_arr, flags)
 % Propagate angular velocity and quaternion according to timesteps
 % contained in t_arr and with initial angular velcocity w0 and initial
 % quaternion q0
@@ -10,6 +10,15 @@ function [omega_out, quat_out, rv_ECI_out, M_out] = propagate(obj, t_arr)
 % to inertial axes.
 
 % If you want gravity gradient, q0 needs to be ECI > princ
+
+% flags: 
+    % 1: gravity gradient
+    % 2: solar radiation pressure
+    % 3: drag
+    % 4: magnetic field
+if nargin == 2
+    flags = ones(1,4);
+end
 
 % Numerical integrator options
 options = odeset('RelTol', 1e-9, 'AbsTol', 1e-9);
@@ -44,7 +53,14 @@ for i = 1:N-1
     % Get environmental torques
     JD_curr = obj.ICs.JD_epoch + (t_arr(i)/86400); 
     env_torques = get_env_torques(obj.ICs, JD_curr, rv0(1:3), rv0(4:6), q0);
-    M0 = env_torques.all;
+    if all(flags)
+        M0 = env_torques.all;
+    else
+        M0 = flags(1)*env_torques.grav + ...
+             flags(2)*env_torques.srp + ...
+             flags(3)*env_torques.drag + ...
+             flags(4)*env_torques.mag;
+    end
     
     % Update environmental torques output variable
     M_out(:,i+1,1) = env_torques.grav;
