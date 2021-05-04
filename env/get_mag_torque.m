@@ -13,6 +13,6 @@ B_ECI = magnetic_field(k,r_ECI,JD);
 
 M = cross(visors.A_rot*m_body,R_ECI2prin*B_ECI);
 
-% Magnitude check: 2*norm(m_body)*(30710E-9)*s3_constants('R_EARTH_WGS84')/norm(r_ECI) = 1.8012e-19
+% Magnitude check: 2*norm(m_body)*(30710E-9)*s3_constants('R_EARTH_WGS84')^3/norm(r_ECI)^3 = 1.8012e-19
     
 end
