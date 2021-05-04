@@ -17,17 +17,5 @@ clear all; close all; clc;
 
 
 %%
-% Initial Conditions
-w0 = deg2rad([0;0.1;1]);
-q0 = [0; 0; 0; 1];
 
-% Sim time parameters
-t0 = 0; dt = 0.5; tf = 60*10; t_arr = (t0:dt:tf)';
-
-% Visors class (not struct)
-visors = Visors(w0, q0);
-
-[omega_out, quat_out, rv_ECI_out, M_out] = visors.propagate(t_arr);
-
-plot_attitude_3D(visors.ICs, quat_out);
 
