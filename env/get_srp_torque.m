@@ -2,7 +2,7 @@ function srp_torque = get_srp_torque(visors, JD, R_ECI, V_ECI, quat)
 % Calculate torque due to SRP in principal axes 
 
 % First check for eclipse
-SUN_HAT_ECI = s3_em_thirdbody_sun(visors.JD_epoch);
+SUN_HAT_ECI = planetEphemeris(visors.JD_epoch,'Earth','Sun')'*1000; % s3_em_thirdbody_sun(visors.JD_epoch);
 SUN_HAT_ECI = SUN_HAT_ECI ./ norm(SUN_HAT_ECI);
 r_par = dot(R_ECI, SUN_HAT_ECI);
 r_perp = R_ECI - (r_par .* SUN_HAT_ECI);
