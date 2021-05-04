@@ -59,8 +59,8 @@ function [g,h] = igrf_coeffs()
     % remember indexing starts at 0!
     % g(n,m+1) etc
 
-    g = zeros(3);
-    h = zeros(3);
+    g = zeros(5);
+    h = zeros(5);
 
     % n=1
     g(1+1,0+1) = -30186;
@@ -93,6 +93,9 @@ function [g,h] = igrf_coeffs()
     h(4+1,3+1) = 37;
     g(4+1,4+1) = 235;
     h(4+1,4+1) = -307;
+    
+    g = g.*1E-9;
+    h = h.*1E-9;
 
 end
 
@@ -102,10 +105,13 @@ function S = schmidt(k)
     S = ones(k+1);
     for n = 1:k
         ni = n+1;
-        S(ni,1) = S(ni-1,1)*((2*n-1)/n);
         for m = 1:n
             mi = m+1;
-            S(ni,mi) = S(ni,mi-1)*sqrt((n-m+1)*((m==1)+1)/(n+m));
+            if m == 0
+                S(ni,1) = S(ni-1,1)*((2*n-1)/n);
+            else
+                S(ni,mi) = S(ni,mi-1)*sqrt((n-m+1)*((m==1)+1)/(n+m));
+            end
         end
     end
 
@@ -117,13 +123,14 @@ function dP = d_gauss_funs(P,k,theta)
     dP = zeros(k+1);
     for n = 1:k
         ni = n+1;
-        dP(ni,ni) = sin(theta)*dP(ni-1,ni-1) + cos(theta)*P(ni-1,ni-1);
-        for m = 0:(n-1)
+        for m = 0:n
             mi = m+1;
-            if n ==1
-                P(ni,mi) = cos(theta)*dP(ni-1,mi) - sin(theta)*P(ni-1,mi);
+            if n == m
+                dP(ni,mi) = sin(theta)*dP(ni-1,ni-1) + cos(theta)*P(ni-1,ni-1);
+            elseif n == 1
+                dP(ni,mi) = cos(theta)*dP(ni-1,mi) - sin(theta)*P(ni-1,mi);
             else
-                P(ni,mi) = cos(theta)*dP(ni-1,mi) - sin(theta)*P(ni-1,mi) - get_K(n,m)*dP(ni-2,mi);
+                dP(ni,mi) = cos(theta)*dP(ni-1,mi) - sin(theta)*P(ni-1,mi) - get_K(n,m)*dP(ni-2,mi);
             end
         end
     end
@@ -136,10 +143,11 @@ function P = gauss_funs(k,theta)
     P = ones(k+1);
     for n = 1:k
         ni = n+1;
-        P(ni,ni) = sin(theta) * P(ni-1,ni-1);
-        for m = 0:(n-1)
+        for m = 0:n
             mi = m+1;
-            if n == 1
+            if n == m
+                P(ni,ni) = sin(theta) * P(ni-1,ni-1);
+            elseif n == 1
                 P(ni,mi) = cos(theta)*P(ni-1,mi);
             else
                 P(ni,mi) = cos(theta)*P(ni-1,mi) - get_K(n,m)*P(ni-2,mi);
