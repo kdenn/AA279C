@@ -2,6 +2,8 @@
 % Joshua Geiser
 
 clear all; close all; clc;
+colors = DefaultColors();
+repropagate = true;
 
 %% 5-1)
 %{
@@ -14,20 +16,25 @@ clear all; close all; clc;
     Re-use as many functions as possible for solar radiation pressure and
     atmospheric drag.
 %}
+if ~exist('data/5-1.mat','file') || repropagate
+    % Initial Conditions
+    w0 = deg2rad([0;0.1;1]);
+    q0 = [0; 0; 0; 1];
 
-% Initial Conditions
-w0 = deg2rad([0;0.1;1]);
-q0 = [0; 0; 0; 1];
+    % Sim time parameters
+    t0 = 0; dt = 0.5; tf = 60*10; t_arr = (t0:dt:tf)';
 
-% Sim time parameters
-t0 = 0; dt = 0.5; tf = 60*10; t_arr = (t0:dt:tf)';
+    % Visors class (not struct)
+    visors = Visors(w0, q0);
 
-% Visors class (not struct)
-visors = Visors(w0, q0);
+    [omega_out, quat_out, rv_ECI_out, M_out] = visors.propagate(t_arr,[1,1,1,1]);
 
-[omega_out, quat_out, rv_ECI_out, M_out] = visors.propagate(t_arr);
+    plot_attitude_3D(visors.ICs, quat_out);
 
-plot_attitude_3D(visors.ICs, quat_out);
+    save('data/5-1.mat')
+else
+    load('data/5-1.mat')
+end
 
 %% 5-2)
 %{
@@ -39,7 +46,119 @@ plot_attitude_3D(visors.ICs, quat_out);
     sure that center of pressure and center of mass do not coincide.
 %}
 
-% TODO
+names = {'Gravity','SRP','Drag','Magnetic','Total'};
+
+% Please show comparison of numerically computed disturbance torques with
+% expected values and trend from theory (model) and tables (Wertz).
+
+faces = visors.ICs.faces;
+As = faces.area([5,11,18],:);
+rs = faces.bary([5,11,18],:);
+
+P = 1358/(3e8);
+
+df = -(11/9).*P.*As;
+df = [zeros(3,1),df,zeros(3,1)]';
+M_s = cross(rs, df, 2);
+M_s = norm(sum(M_s,2))
+
+Cd = 1.28;
+rho = 1.454e-13;
+
+v = sqrt(visors.ICs.mu/visors.ICs.a);
+
+df = -0.5*Cd*rho*v^2.*As;
+df = [zeros(3,1),df,zeros(3,1)]';
+M_d = cross(rs, df, 2);
+M_d = norm(sum(M_s,2))
+
+
+% Plot all torque components in principal axes over time. 
+figure(); hold on; 
+
+    subplot(3,1,1); hold on; grid on;
+        ylabel('M_x')
+        for i = 1:5
+            plot(t_arr'./60, M_out(1,:,i), 'DisplayName', names{i},'Color',colors(i,:));
+        end
+        legend();
+    hold off
+
+    subplot(3,1,2); hold on; grid on;
+        ylabel('M_y')
+        for i = 1:5
+            plot(t_arr'./60, M_out(2,:,i), 'DisplayName', names{i},'Color',colors(i,:));
+        end
+    hold off
+
+    subplot(3,1,3); hold on; grid on;
+        xlabel('t (min)')
+        ylabel('M_z')
+        for i = 1:5
+            plot(t_arr'./60, M_out(3,:,i), 'DisplayName', names{i},'Color',colors(i,:));
+        end
+    hold off
+
+set(gcf, 'Position',  [100, 100, 800, 700]);
+hold off
+
+figure(); hold on; 
+
+    subplot(3,1,1); hold on; grid on;
+        ylabel('M_x')
+        for i = 4
+            plot(t_arr'./60, M_out(1,:,i), 'DisplayName', names{i},'Color',colors(i,:));
+        end
+        legend();
+    hold off
+
+    subplot(3,1,2); hold on; grid on;
+        ylabel('M_y')
+        for i = 4
+            plot(t_arr'./60, M_out(2,:,i), 'DisplayName', names{i},'Color',colors(i,:));
+        end
+    hold off
+
+    subplot(3,1,3); hold on; grid on;
+        xlabel('t (min)')
+        ylabel('M_z')
+        for i = 4
+            plot(t_arr'./60, M_out(3,:,i), 'DisplayName', names{i},'Color',colors(i,:));
+        end
+    hold off
+
+set(gcf, 'Position',  [100, 100, 800, 700]);
+hold off
+
+figure(); hold on; 
+
+    subplot(3,1,1); hold on; grid on;
+        ylabel('M_x')
+        for i = 2:3
+            plot(t_arr'./60, M_out(1,:,i), 'DisplayName', names{i},'Color',colors(i,:));
+        end
+        legend();
+    hold off
+
+    subplot(3,1,2); hold on; grid on;
+        ylabel('M_y')
+        for i = 2:3
+            plot(t_arr'./60, M_out(2,:,i), 'DisplayName', names{i},'Color',colors(i,:));
+        end
+    hold off
+
+    subplot(3,1,3); hold on; grid on;
+        xlabel('t (min)')
+        ylabel('M_z')
+        for i = 2:3
+            plot(t_arr'./60, M_out(3,:,i), 'DisplayName', names{i},'Color',colors(i,:));
+        end
+    hold off
+
+set(gcf, 'Position',  [100, 100, 800, 700]);
+hold off
+
+return
 
 %% 5-3 and 5-4)
 %{
@@ -50,16 +169,13 @@ plot_attitude_3D(visors.ICs, quat_out);
     the  definition and  computation  of  the  desired  or  nominal or
     target attitude of the spacecraft. In general, this can be expressed in
     body or principal axes.
-%}
-%{
+
     Note that the attitude control error represents a rotation matrix (DCM)
     which quantifies how far the actualattitude  is  from  the  true
     attitude. You  can  use  any  parameterization to  plot  the  attitude
     control errors corresponding to this DCM. Give interpretation of the
     attitude control errors given the applied disturbances.
 %}
-
-s = visorsStruct();
 
 % Initial Conditions
 s = visorsStruct();
