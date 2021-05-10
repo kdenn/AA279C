@@ -42,17 +42,17 @@ quat_out(:,1) = obj.q0; % ECI > Princ
 rv_ECI_out(:,1) = [obj.ICs.r_ECI_0; obj.ICs.v_ECI_0];
 
 for i = 1:N-1
-    % Next timestep
-    t_prop = [t_arr(i) t_arr(i+1)];
+    % Current time 
+    t = t_arr(i);
+    JD_curr = obj.ICs.JD_epoch + (t/86400); 
     
-    % Initial conditions for next timestep
-    rv0 = rv_ECI_out(:,i);
-    w0 = omega_out(:,i);
-    q0 = quat_out(:,i);
+    % Values at current timestep 
+    rv = rv_ECI_out(:,i);
+    w = omega_out(:,i);
+    q = quat_out(:,i);
     
     % Get environmental torques
-    JD_curr = obj.ICs.JD_epoch + (t_arr(i)/86400); 
-    env_torques = get_env_torques(obj.ICs, JD_curr, rv0(1:3), rv0(4:6), q0, flags);
+    env_torques = get_env_torques(obj.ICs, JD_curr, rv(1:3), rv(4:6), q, flags);
     M0 = env_torques.all;
     
     % Update environmental torques output variable
@@ -62,17 +62,30 @@ for i = 1:N-1
     M_out(:,i+1,4) = env_torques.mag;
     M_out(:,i+1,5) = env_torques.all;
     
+    % Get measurements (ground-truth and corrupted measurements)
+    [m1_meas, m2_meas, m1_true, m2_true] = obj.get_ref_vecs_meas(JD_curr, q);
+    q_est = obj.opts.est_q(m1_meas, m2_meas, m1_true, m2_true);
+    obj.est.q = [obj.est.q, q_est];
+    
+    % For propagation to next timestep
+    t_prop = [t t_arr(i+1)];
+    
     % Step ECI position/velocity
-    [~,rv_out] = ode45(@FODEint, t_prop, rv0, options);
+    [~,rv_out] = ode45(@FODEint, t_prop, rv, options);
     rv_ECI_out(:,i+1) = rv_out(end,:)';
     
     % Step angular velocity (Euler propagates in princ)
-    [~, w_out] = ode45(@(t,y) int_Euler_eqs(t,y,obj.ICs.I_princ,M0), t_prop, w0, options);
+    [~, w_out] = ode45(@(t,y) int_Euler_eqs(t,y,obj.ICs.I_princ,M0), t_prop, w, options);
     omega_out(:,i+1) = w_out(end,:)';
     
     % Step quaternion
-    [~, q_out] = ode45(@(t,y) int_quaternion(t,y,w_out(end,:)'), t_prop, q0, options);
+    [~, q_out] = ode45(@(t,y) int_quaternion(t,y,w_out(end,:)'), t_prop, q, options);
     quat_out(:,i+1) = q_out(end,:)'./norm(q_out(end,:)');
 end
+
+obj.true.w = omega_out;
+obj.true.q = quat_out;
+obj.true.rv_ECI = rv_ECI_out;
+obj.true.M_env = M_out;
 
 end

@@ -9,6 +9,12 @@ classdef Visors < handle
         % Struct containing various options/flags 
         opts
         
+        % truth
+        true
+        
+        % spacecraft onboard computer
+        est
+        
     end
     methods
         
@@ -23,6 +29,13 @@ classdef Visors < handle
                 opts = obj.get_default_opts;
             end
             obj.opts = opts;
+            
+            % Spacecraft's true state ("nature")
+            obj.true = struct();
+            
+            % Spacecraft's onboard estimates
+            obj.est = struct();
+            obj.est.q = [];
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -146,7 +159,7 @@ classdef Visors < handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Get measurements of ref unit vectors for attitude determination
         % Currently gets measurment directions to Sun and Alpha Centauri A
-        function [m1_meas, m2_meas] = get_ref_vecs_meas(obj, JD, q)
+        function [m1_meas, m2_meas, m1_true, m2_true] = get_ref_vecs_meas(obj, JD, q)
             
             [m1_true, m2_true] = obj.get_ref_vecs_true(JD);
             
@@ -155,7 +168,7 @@ classdef Visors < handle
             m2_meas = obj.ICs.A_rot' * quat2dcm(q) * m2_true;
             
             % If not corrupting measurements, return now
-            if obj.opts.corrupts_measurements == 0
+            if obj.opts.corrupt_measurements == 0
                 return
             end
             
