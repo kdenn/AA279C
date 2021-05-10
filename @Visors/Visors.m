@@ -181,11 +181,13 @@ classdef Visors < handle
             end
             
             % Noise characteristics for sensor 1
-            Q_1 = 0.001 * eye(3);
+            one_sigma = deg2rad(40/3600);
+            Q_1 = one_sigma^2 * eye(3);
             mu_1 = [0;0;0];
             
             % Noise characteristics for sensor 2
-            Q_2 = 0.001 * eye(3);
+            one_sigma = deg2rad(40/3600);
+            Q_2 = one_sigma^2 * eye(3);
             mu_2 = [0;0;0];
             
             % Corrupt measurements with noise
@@ -208,7 +210,7 @@ classdef Visors < handle
             end
             
             % Noise characteristics for IMUs
-            Q = 0.00001 * eye(3);
+            Q = deg2rad(0.01)^2 * eye(3);
             mu = [0;0;0];
             
             % Corrupt measurements with noise
