@@ -25,6 +25,7 @@ classdef Visors < handle
             obj.opts = opts;
         end
         
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Calculate desired quaternion for Sun-pointing
         function q_des = calc_q_des(obj, t_arr)
             
@@ -50,9 +51,45 @@ classdef Visors < handle
             end
         end
         
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % q-method for statistical attitude determination
+        function q_out = calc_q_stat(obj, m1_m, m2_m, m1_t, m2_t)
+            
+            % make W matrix of measurements (in principal axes)
+            % Weights all currently set to 1
+            w_1 = m1_m;
+            w_2 = cross(m1_m,m2_m) ./ norm(cross(m1_m,m2_m));
+            w_3 = cross(w_1,w_2);
+            W = obj.ICs.A_rot * [w_1, w_2, w_3];
+
+            % Make V matrix of true reference directions (in ECI)
+            % Weights all currently set to 1
+            v_1 = m1_t;
+            v_2 = cross(m1_t,m2_t) ./ norm(cross(m1_t,m2_t));
+            v_3 = cross(v_1,v_2);
+            V = [v_1, v_2, v_3];
+            
+            % Calculation of intermediate values used in q-method
+            B = W * V';
+            S = B + B';
+            Z = [B(2,3)-B(3,2); B(3,1)-B(1,3); B(1,2)-B(2,1)];
+            sigma = trace(B);
+            K = [S-sigma*eye(3), Z; Z', sigma];
+            
+            % Calculation of output q through eigenvalue/eigenvector
+            % problem
+            [eig_vec, eig_val] = eig(K);
+            q_out = eig_vec(:,4);
+            
+            % To account for and get rid of sign flips
+            q_out = dcm2quat(quat2dcm(q_out));
+        end
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % deterministic attitude determination
         function q_out = calc_q_det(obj, m1_m, m2_m, m1_t, m2_t)
 
-            % If flag, use fictitious measurements
+            % If flag set to 1, use fictitious measurements
             if obj.opts.calc_q_det_flag == 1
                 m1_m_tilde = (m1_m + m2_m) ./ 2;
                 m2_m_tilde = (m1_m - m2_m) ./ 2;
@@ -82,6 +119,9 @@ classdef Visors < handle
             q_out = dcm2quat(A);
         end
         
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Get truth reference unit vectors for attitude determination
+        % Currently gets truth direction to Sun and Alpha Centauri A
         function [m1_true, m2_true] = get_ref_vecs_true(obj, JD)
             
             % Cartesian coords of unit vector to Sun in ECI frame
@@ -103,6 +143,9 @@ classdef Visors < handle
             m2_true = [cos(phi)*sin(theta); sin(phi)*sin(theta); cos(theta)];
         end
         
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Get measurements of ref unit vectors for attitude determination
+        % Currently gets measurment directions to Sun and Alpha Centauri A
         function [m1_meas, m2_meas] = get_ref_vecs_meas(obj, JD, q)
             
             [m1_true, m2_true] = obj.get_ref_vecs_true(JD);
@@ -111,17 +154,22 @@ classdef Visors < handle
             m1_meas = obj.ICs.A_rot' * quat2dcm(q) * m1_true;
             m2_meas = obj.ICs.A_rot' * quat2dcm(q) * m2_true;
             
+            % If not corrupting measurements, return now
+            if obj.opts.corrupts_measurements == 0
+                return
+            end
+            
             % Noise characteristics for sensor 1
-            Q_1 = 0.00 * eye(3);
+            Q_1 = 0.001 * eye(3);
             mu_1 = [0;0;0];
-            noise_1 = sqrtm(Q_1)*randn(3,1) + mu_1;
             
             % Noise characteristics for sensor 2
-            Q_2 = 0.00 * eye(3);
+            Q_2 = 0.001 * eye(3);
             mu_2 = [0;0;0];
-            noise_2 = sqrtm(Q_2)*randn(3,1) + mu_2;
             
             % Corrupt measurements with noise
+            noise_1 = sqrtm(Q_1)*randn(3,1) + mu_1;
+            noise_2 = sqrtm(Q_2)*randn(3,1) + mu_2;
             m1_meas = m1_meas + noise_1;
             m2_meas = m2_meas + noise_2;
         end

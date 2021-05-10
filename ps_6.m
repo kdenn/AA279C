@@ -13,7 +13,7 @@ t0 = 0; dt = 1; tf = 10; t_arr = (t0:dt:tf)';
 % Set options for class
 opts = struct();
 opts.calc_q_det_flag = 1;
-opts.corrupts_measurements = 0;
+opts.corrupts_measurements = 1;
 
 % Visors class (not struct)
 visors = Visors(w0, q0, opts);
@@ -22,4 +22,6 @@ visors = Visors(w0, q0, opts);
 
 [m1_true, m2_true] = visors.get_ref_vecs_true(visors.ICs.JD_epoch);
 [m1_meas, m2_meas] = visors.get_ref_vecs_meas(visors.ICs.JD_epoch, quat_out(:,1));
-q_out = visors.calc_q_det(m1_meas, m2_meas, m1_true, m2_true);
+q_out = visors.calc_q_stat(m1_meas, m2_meas, m1_true, m2_true);
+
+q_out - q0
