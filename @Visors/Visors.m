@@ -36,6 +36,7 @@ classdef Visors < handle
             % Spacecraft's onboard estimates
             obj.est = struct();
             obj.est.q = [];
+            obj.est.q_from_w = [];
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -62,6 +63,13 @@ classdef Visors < handle
                 quat = dcm2quat(obj.ICs.A_rot * DCM_ECI_TO_SUN);
                 q_des(:,i) = quat;
             end
+        end
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Attitude determination from angular velocity measurements
+        function q_out = calc_q_from_w(obj, w_est, q, t_prop, options)
+            [~, q_out] = ode45(@(t,y) int_quaternion(t,y,w_est), t_prop, q, options);
+            q_out = q_out(end,:)'./norm(q_out(end,:)');
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -185,6 +193,27 @@ classdef Visors < handle
             noise_2 = sqrtm(Q_2)*randn(3,1) + mu_2;
             m1_meas = m1_meas + noise_1;
             m2_meas = m2_meas + noise_2;
+        end
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Get measurements of angular velocity for attitude determination
+        function w_meas = get_w_meas(obj, w_true)
+            
+            % Get angular velocity measurments from true values
+            w_meas = w_true;
+            
+            % If not corrupting measurements, return now
+            if obj.opts.corrupt_measurements == 0
+                return
+            end
+            
+            % Noise characteristics for IMUs
+            Q = 0.00001 * eye(3);
+            mu = [0;0;0];
+            
+            % Corrupt measurements with noise
+            noise = sqrtm(Q)*randn(3,1) + mu;
+            w_meas = w_meas + noise;
         end
     end
 end

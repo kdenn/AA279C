@@ -62,10 +62,20 @@ for i = 1:N-1
     M_out(:,i+1,4) = env_torques.mag;
     M_out(:,i+1,5) = env_torques.all;
     
-    % Get measurements (ground-truth and corrupted measurements)
+    % Get reference direction measurements and calculate q
     [m1_meas, m2_meas, m1_true, m2_true] = obj.get_ref_vecs_meas(JD_curr, q);
     q_est = obj.opts.est_q(m1_meas, m2_meas, m1_true, m2_true);
     obj.est.q = [obj.est.q, q_est];
+    
+    % Get angular velocity measurements and calculate q
+    w_est = obj.get_w_meas(w);
+    if length(obj.est.q_from_w) == 0
+        q_in = q;
+    else
+        q_in = obj.est.q_from_w(:,end);
+    end
+    q_from_w = obj.calc_q_from_w(w_est, q_in, [t t_arr(i+1)], options);
+    obj.est.q_from_w = [obj.est.q_from_w, q_from_w];
     
     % For propagation to next timestep
     t_prop = [t t_arr(i+1)];
