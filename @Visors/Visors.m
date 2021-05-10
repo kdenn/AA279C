@@ -41,5 +41,51 @@ classdef Visors < handle
                 q_des(:,i) = quat;
             end
         end
+        
+        function [m1_true, m2_true] = get_ref_vecs_true(obj, JD)
+            
+            % Cartesian coords of unit vector to Sun in ECI frame
+            m1_true = unitVec(get_sun_position(JD));
+            
+            % Right ascention of Alpha Centauri A in [HH, MM, SS]
+            ra = [14, 39, 35.06311];
+
+            % Declination of Alpha Centauri A in [deg, min, sec]
+            de = [-60, 50, 15.0992];
+
+            % Spherical coords
+            phi = ra(1) + ra(2)/60 + ra(2)/3600; 
+            phi = (phi/24)*2*pi;
+            theta = de(1) + sign(de(1))*(de(2)/60 + de(3)/3600);
+            theta = deg2rad(90 - theta);
+
+            % Cartesian coords of unit vector to Alpha Centauri A in ECI frame
+            m2_true = [cos(phi)*sin(theta); sin(phi)*sin(theta); cos(theta)];
+        end
+        
+        function [m1_meas, m2_meas] = get_ref_vecs_meas(obj, JD, q, A)
+            
+            [m1_true, m2_true] = obj.get_ref_vecs_true(JD);
+            
+            % Get measurements in spacecraft body frame
+            m1_meas = A' * quat2dcm(q) * m1_true;
+            m2_meas = A' * quat2dcm(q) * m2_true;
+            
+            % Noise characteristics for sensor 1
+            Q_1 = 0.00 * eye(3);
+            mu_1 = [0;0;0];
+            noise_1 = sqrtm(Q_1)*randn(3,1) + mu_1;
+            
+            % Noise characteristics for sensor 2
+            Q_2 = 0.00 * eye(3);
+            mu_2 = [0;0;0];
+            noise_2 = sqrtm(Q_2)*randn(3,1) + mu_2;
+            
+            
+            % Corrupt measurements with noise
+            m1_meas = m1_meas + noise_1;
+            m2_meas = m2_meas + noise_2;
+            
+        end
     end
 end
