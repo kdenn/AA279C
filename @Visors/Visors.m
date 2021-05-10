@@ -6,15 +6,23 @@ classdef Visors < handle
         w0 
         q0
         
+        % Struct containing various options/flags 
+        opts
+        
     end
     methods
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Constructor
-        function obj = Visors(w0, q0)
+        function obj = Visors(w0, q0, opts)
             obj.ICs = visorsStruct();
             obj.w0 = w0;
             obj.q0 = q0;
+            
+            if ~exist('opts', 'var')
+                opts = obj.get_default_opts;
+            end
+            obj.opts = opts;
         end
         
         % Calculate desired quaternion for Sun-pointing
@@ -42,6 +50,38 @@ classdef Visors < handle
             end
         end
         
+        function q_out = calc_q_det(obj, m1_m, m2_m, m1_t, m2_t)
+
+            % If flag, use fictitious measurements
+            if obj.opts.calc_q_det_flag == 1
+                m1_m_tilde = (m1_m + m2_m) ./ 2;
+                m2_m_tilde = (m1_m - m2_m) ./ 2;
+                m1_m = m1_m_tilde;
+                m2_m = m2_m_tilde;
+                
+                m1_t_tilde = (m1_t + m2_t) ./ 2;
+                m2_t_tilde = (m1_t - m2_t) ./ 2;
+                m1_t = m1_t_tilde;
+                m2_t = m2_t_tilde;
+            end
+            
+            % make M matrix of measurements (in principal axes)
+            p_m = m1_m;
+            q_m = cross(m1_m,m2_m) ./ norm(cross(m1_m,m2_m));
+            r_m = cross(p_m,q_m);
+            M = obj.ICs.A_rot * [p_m, q_m, r_m];
+
+            % Make V matrix of true reference directions (in ECI)
+            p_v = m1_t;
+            q_v = cross(m1_t,m2_t) ./ norm(cross(m1_t,m2_t));
+            r_v = cross(p_v,q_v);
+            V = [p_v, q_v, r_v];
+
+            % Calculate quaternion
+            A = M * inv(V);
+            q_out = dcm2quat(A);
+        end
+        
         function [m1_true, m2_true] = get_ref_vecs_true(obj, JD)
             
             % Cartesian coords of unit vector to Sun in ECI frame
@@ -63,13 +103,13 @@ classdef Visors < handle
             m2_true = [cos(phi)*sin(theta); sin(phi)*sin(theta); cos(theta)];
         end
         
-        function [m1_meas, m2_meas] = get_ref_vecs_meas(obj, JD, q, A)
+        function [m1_meas, m2_meas] = get_ref_vecs_meas(obj, JD, q)
             
             [m1_true, m2_true] = obj.get_ref_vecs_true(JD);
             
             % Get measurements in spacecraft body frame
-            m1_meas = A' * quat2dcm(q) * m1_true;
-            m2_meas = A' * quat2dcm(q) * m2_true;
+            m1_meas = obj.ICs.A_rot' * quat2dcm(q) * m1_true;
+            m2_meas = obj.ICs.A_rot' * quat2dcm(q) * m2_true;
             
             % Noise characteristics for sensor 1
             Q_1 = 0.00 * eye(3);
@@ -81,11 +121,9 @@ classdef Visors < handle
             mu_2 = [0;0;0];
             noise_2 = sqrtm(Q_2)*randn(3,1) + mu_2;
             
-            
             % Corrupt measurements with noise
             m1_meas = m1_meas + noise_1;
             m2_meas = m2_meas + noise_2;
-            
         end
     end
 end
