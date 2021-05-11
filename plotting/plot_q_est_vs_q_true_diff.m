@@ -25,21 +25,21 @@ sqrt(sum(temp.^2));
 figure(); 
 subplot(4,1,1); hold on; grid on;
 plot(t_arr, q_diff(1,:), 'b');
-xlabel('Time (min)'); ylabel('q_1');
+xlabel('Time (min)'); ylabel('q_1 error');
 ylim([-y_max y_max]);
 
 subplot(4,1,2); hold on; grid on;
 plot(t_arr, q_diff(2,:), 'b');
-xlabel('Time (min)'); ylabel('q_2');
+xlabel('Time (min)'); ylabel('q_2 error');
 ylim([-y_max y_max]);
 
 subplot(4,1,3); hold on; grid on;
 plot(t_arr, q_diff(3,:), 'b');
-xlabel('Time (min)'); ylabel('q_3');
+xlabel('Time (min)'); ylabel('q_3 error');
 ylim([-y_max y_max]);
 
 subplot(4,1,4); hold on; grid on;
 plot(t_arr, q_diff(4,:), 'b');
-xlabel('Time (min)'); ylabel('q_4');
+xlabel('Time (min)'); ylabel('q_4 error');
 ylim([-y_max y_max]);
 end

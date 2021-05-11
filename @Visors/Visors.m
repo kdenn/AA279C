@@ -142,11 +142,23 @@ classdef Visors < handle
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Get truth reference unit vectors for attitude determination
-        % Currently gets truth direction to Sun and Alpha Centauri A
-        function [m1_true, m2_true] = get_ref_vecs_true(obj, JD)
+        % Currently gets truth direction to Sirius and Alpha Centauri A
+        function [m1_true, m2_true] = get_ref_vecs_true(obj)
             
-            % Cartesian coords of unit vector to Sun in ECI frame
-            m1_true = unitVec(get_sun_position(JD));
+            % Right ascention of Sirius A in [HH, MM, SS]
+            ra = [06, 45, 8.9];
+
+            % Declination of Sirius A in [deg, min, sec]
+            de = [-16, 42, 58];
+
+            % Spherical coords
+            phi = ra(1) + ra(2)/60 + ra(2)/3600; 
+            phi = (phi/24)*2*pi;
+            theta = de(1) + sign(de(1))*(de(2)/60 + de(3)/3600);
+            theta = deg2rad(90 - theta);
+
+            % Cartesian coords of unit vector to Alpha Centauri A in ECI frame
+            m1_true = [cos(phi)*sin(theta); sin(phi)*sin(theta); cos(theta)];
             
             % Right ascention of Alpha Centauri A in [HH, MM, SS]
             ra = [14, 39, 35.06311];
@@ -167,9 +179,9 @@ classdef Visors < handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Get measurements of ref unit vectors for attitude determination
         % Currently gets measurment directions to Sun and Alpha Centauri A
-        function [m1_meas, m2_meas, m1_true, m2_true] = get_ref_vecs_meas(obj, JD, q)
+        function [m1_meas, m2_meas, m1_true, m2_true] = get_ref_vecs_meas(obj, q)
             
-            [m1_true, m2_true] = obj.get_ref_vecs_true(JD);
+            [m1_true, m2_true] = obj.get_ref_vecs_true();
             
             % Get measurements in spacecraft body frame
             m1_meas = obj.ICs.A_rot' * quat2dcm(q) * m1_true;

@@ -63,7 +63,7 @@ for i = 1:N-1
     M_out(:,i+1,5) = env_torques.all;
     
     % Get reference direction measurements and calculate q
-    [m1_meas, m2_meas, m1_true, m2_true] = obj.get_ref_vecs_meas(JD_curr, q);
+    [m1_meas, m2_meas, m1_true, m2_true] = obj.get_ref_vecs_meas(q);
     q_est = obj.opts.est_q(m1_meas, m2_meas, m1_true, m2_true);
     obj.est.q = [obj.est.q, q_est];
     
