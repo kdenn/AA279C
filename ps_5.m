@@ -203,8 +203,26 @@ plot(t_arr./60, q_diff(1,:));
 plot(t_arr./60, q_diff(2,:));
 plot(t_arr./60, q_diff(3,:));
 plot(t_arr./60, q_diff(4,:));
-xlabel('Time (min)'); ylabel('Quaternion');
+xlabel('Time (min)'); ylabel('Difference in Quaternion Components');
 legend('q_1', 'q_2', 'q_3', 'q_4');
+
+%%
+figure(); 
+subplot(1,2,1); hold on; grid on;
+plot(t_arr./60, quat_out(1,:));
+plot(t_arr./60, quat_out(2,:));
+plot(t_arr./60, quat_out(3,:));
+plot(t_arr./60, quat_out(4,:));
+xlabel('Time (min)'); ylabel('True Quaternion');
+legend('q_1', 'q_2', 'q_3', 'q_4');
+
+subplot(1,2,2); hold on; grid on;
+plot(t_arr./60, q_des(1,:));
+plot(t_arr./60, q_des(2,:));
+plot(t_arr./60, q_des(3,:));
+plot(t_arr./60, q_des(4,:));
+xlabel('Time (min)'); ylabel('Desired Quaternion');
+legend('q_1', 'q_2', 'q_3', 'q_4'); ylim([-1 1]);
 
 %%
 angle_err = calc_angle_err(visors.ICs, quat_out, q_des);
