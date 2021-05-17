@@ -41,6 +41,25 @@ omega_out(:,1) = obj.w0; % Princ
 quat_out(:,1) = obj.q0; % ECI > Princ
 rv_ECI_out(:,1) = [obj.ICs.r_ECI_0; obj.ICs.v_ECI_0];
 
+% EKF initialization
+dt = diff(t_arr(1:2));
+Q = 0.100*dt*eye(7);      % TODO: update process noise covariance
+R_st = (deg2rad(40/3600))^2 * eye(3);
+R_imu = (1.7453E-4)^2 * eye(3);
+R = blkdiag(R_imu,R_st,R_st);
+
+[m1_meas, m2_meas, m1_true, m2_true] = obj.get_ref_vecs_meas(obj.q0);
+q_est = obj.opts.est_q(m1_meas, m2_meas, m1_true, m2_true);
+w_est = obj.get_w_meas(obj.w0);
+mu = [w_est;q_est]; 
+cov = blkdiag(R_imu,(deg2rad(40/3600))^2 * eye(4)); % TODO: check this?
+
+mu_arr = zeros(7,N);
+mu_arr(:,1) = mu;
+cov_arr = zeros(7,7,N);
+cov_arr(:,:,1) = cov;
+obs_rank_arr = zeros(1,N);
+
 for i = 1:N-1
     % Current time 
     t = t_arr(i);
@@ -53,7 +72,7 @@ for i = 1:N-1
     
     % Get environmental torques
     env_torques = get_env_torques(obj.ICs, JD_curr, rv(1:3), rv(4:6), q, flags);
-    M0 = env_torques.all;
+    M = env_torques.all;
     
     % Update environmental torques output variable
     M_out(:,i+1,1) = env_torques.grav;
@@ -79,13 +98,24 @@ for i = 1:N-1
     
     % For propagation to next timestep
     t_prop = [t t_arr(i+1)];
+    dt = diff(t_prop);
+    
+    % Onboard State Estimation
+    y = [m1_meas;m2_meas];
+    u = M;
+    mu = mu_arr(:,i);
+    cov = cov_arr(:,:,i);
+    [mu,cov,A,C] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,u,dt);
+    mu_arr(:,i+1) = mu;
+    cov_arr(:,:,i+1) = cov;
+    obs_rank_arr(i+1) = rank(obsv(A,C));
     
     % Step ECI position/velocity
     [~,rv_out] = ode45(@FODEint, t_prop, rv, options);
     rv_ECI_out(:,i+1) = rv_out(end,:)';
     
     % Step angular velocity (Euler propagates in princ)
-    [~, w_out] = ode45(@(t,y) int_Euler_eqs(t,y,obj.ICs.I_princ,M0), t_prop, w, options);
+    [~, w_out] = ode45(@(t,y) int_Euler_eqs(t,y,obj.ICs.I_princ,M), t_prop, w, options);
     omega_out(:,i+1) = w_out(end,:)';
     
     % Step quaternion
