@@ -141,42 +141,6 @@ classdef Visors < handle
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % Get truth reference unit vectors for attitude determination
-        % Currently gets truth direction to Sirius and Alpha Centauri A
-        function [m1_true, m2_true] = get_ref_vecs_true(obj)
-            
-            % Right ascention of Sirius A in [HH, MM, SS]
-            ra = [06, 45, 8.9];
-
-            % Declination of Sirius A in [deg, min, sec]
-            de = [-16, 42, 58];
-
-            % Spherical coords
-            phi = ra(1) + ra(2)/60 + ra(2)/3600; 
-            phi = (phi/24)*2*pi;
-            theta = de(1) + sign(de(1))*(de(2)/60 + de(3)/3600);
-            theta = deg2rad(90 - theta);
-
-            % Cartesian coords of unit vector to Sirius A in ECI frame
-            m1_true = [cos(phi)*sin(theta); sin(phi)*sin(theta); cos(theta)];
-            
-            % Right ascention of Alpha Centauri A in [HH, MM, SS]
-            ra = [14, 39, 35.06311];
-
-            % Declination of Alpha Centauri A in [deg, min, sec]
-            de = [-60, 50, 15.0992];
-
-            % Spherical coords
-            phi = ra(1) + ra(2)/60 + ra(2)/3600; 
-            phi = (phi/24)*2*pi;
-            theta = de(1) + sign(de(1))*(de(2)/60 + de(3)/3600);
-            theta = deg2rad(90 - theta);
-
-            % Cartesian coords of unit vector to Alpha Centauri A in ECI frame
-            m2_true = [cos(phi)*sin(theta); sin(phi)*sin(theta); cos(theta)];
-        end
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Get measurements of ref unit vectors for attitude determination
         % Currently gets measurment directions to Sun and Alpha Centauri A
         function [m1_meas, m2_meas, m1_true, m2_true] = get_ref_vecs_meas(obj, q, no_noise)
@@ -232,6 +196,43 @@ classdef Visors < handle
             % Corrupt measurements with noise
             noise = sqrtm(Q)*randn(3,1) + mu;
             w_meas = w_meas + noise;
+        end
+    end
+    methods (Static)
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Get truth reference unit vectors for attitude determination
+        % Currently gets truth direction to Sirius and Alpha Centauri A
+        function [m1_true, m2_true] = get_ref_vecs_true()
+            
+            % Right ascention of Sirius A in [HH, MM, SS]
+            ra = [06, 45, 8.9];
+
+            % Declination of Sirius A in [deg, min, sec]
+            de = [-16, 42, 58];
+
+            % Spherical coords
+            phi = ra(1) + ra(2)/60 + ra(2)/3600; 
+            phi = (phi/24)*2*pi;
+            theta = de(1) + sign(de(1))*(de(2)/60 + de(3)/3600);
+            theta = deg2rad(90 - theta);
+
+            % Cartesian coords of unit vector to Sirius A in ECI frame
+            m1_true = [cos(phi)*sin(theta); sin(phi)*sin(theta); cos(theta)];
+            
+            % Right ascention of Alpha Centauri A in [HH, MM, SS]
+            ra = [14, 39, 35.06311];
+
+            % Declination of Alpha Centauri A in [deg, min, sec]
+            de = [-60, 50, 15.0992];
+
+            % Spherical coords
+            phi = ra(1) + ra(2)/60 + ra(2)/3600; 
+            phi = (phi/24)*2*pi;
+            theta = de(1) + sign(de(1))*(de(2)/60 + de(3)/3600);
+            theta = deg2rad(90 - theta);
+
+            % Cartesian coords of unit vector to Alpha Centauri A in ECI frame
+            m2_true = [cos(phi)*sin(theta); sin(phi)*sin(theta); cos(theta)];
         end
     end
 end
