@@ -157,7 +157,7 @@ classdef Visors < handle
             theta = de(1) + sign(de(1))*(de(2)/60 + de(3)/3600);
             theta = deg2rad(90 - theta);
 
-            % Cartesian coords of unit vector to Alpha Centauri A in ECI frame
+            % Cartesian coords of unit vector to Sirius A in ECI frame
             m1_true = [cos(phi)*sin(theta); sin(phi)*sin(theta); cos(theta)];
             
             % Right ascention of Alpha Centauri A in [HH, MM, SS]
