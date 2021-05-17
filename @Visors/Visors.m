@@ -179,7 +179,7 @@ classdef Visors < handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Get measurements of ref unit vectors for attitude determination
         % Currently gets measurment directions to Sun and Alpha Centauri A
-        function [m1_meas, m2_meas, m1_true, m2_true] = get_ref_vecs_meas(obj, q)
+        function [m1_meas, m2_meas, m1_true, m2_true] = get_ref_vecs_meas(obj, q, no_noise)
             
             [m1_true, m2_true] = obj.get_ref_vecs_true();
             
@@ -187,8 +187,12 @@ classdef Visors < handle
             m1_meas = obj.ICs.A_rot' * quat2dcm(q) * m1_true;
             m2_meas = obj.ICs.A_rot' * quat2dcm(q) * m2_true;
             
+            if nargin == 2
+                no_noise = false;
+            end
+            
             % If not corrupting measurements, return now
-            if obj.opts.corrupt_measurements == 0
+            if obj.opts.corrupt_measurements == 0 || no_noise
                 return
             end
             
