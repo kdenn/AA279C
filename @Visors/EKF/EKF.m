@@ -44,28 +44,17 @@ for i = 1:N-1
     
     % Get input at timestep
     u = u_arr(:,i);
-        
-    % Predict Step
-    A = get_A(mu, u, dt);       % A = STM in 279C notation
-    mu_bar = f(mu, u, dt);
-    cov_bar = A * cov * A' + Q;
     
     % Update Step for iEKF
     if iEKF == 1
-        mu = mu_bar; 
         for j = 1:10
-            C = get_C(mu, u, dt);   % C = H in 279C notation
-            K = cov_bar * C' * inv(C * cov_bar * C' + R);
-            mu = mu_bar + K*(Y_arr(:,i+1)-g(mu, u, dt)) + K*C*(mu-mu_bar);
+            [mu, cov2, A, C] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,Y_arr(:,i+1),u,dt);
         end
-        cov = cov_bar - K * C * cov_bar;
+        cov = cov2;
         
     % Update step for standard EKF
     else
-        C = get_C(mu_bar, u, dt);   % C = H in 279C notation
-        K = cov_bar * C' * inv(C * cov_bar * C' + R);
-        mu = mu_bar + K * (Y_arr(:,i+1) - g(mu_bar, u, dt));
-        cov = cov_bar - K * C * cov_bar;
+        [mu, cov, A, C] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,Y_arr(:,i+1),u,dt);
     end
     
     % Check observability matrix
