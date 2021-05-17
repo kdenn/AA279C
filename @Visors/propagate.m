@@ -1,4 +1,4 @@
-function [omega_out, quat_out, rv_ECI_out, M_out] = propagate(obj, t_arr, flags)
+function [omega_out, quat_out, rv_ECI_out, M_out, mu_arr, cov_arr, obs_rank_arr] = propagate(obj, t_arr, flags)
 % Propagate angular velocity and quaternion according to timesteps
 % contained in t_arr and with initial angular velcocity w0 and initial
 % quaternion q0
@@ -16,8 +16,9 @@ function [omega_out, quat_out, rv_ECI_out, M_out] = propagate(obj, t_arr, flags)
     % 2: solar radiation pressure
     % 3: drag
     % 4: magnetic field
+    % 5: EKF
 if nargin == 2
-    flags = ones(1,4);
+    flags = ones(1,5);
 end
 
 % Numerical integrator options
@@ -101,14 +102,16 @@ for i = 1:N-1
     dt = diff(t_prop);
     
     % Onboard State Estimation
-    y = [m1_meas;m2_meas];
-    u = M;
-    mu = mu_arr(:,i);
-    cov = cov_arr(:,:,i);
-    [mu,cov,A,C] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,u,dt);
-    mu_arr(:,i+1) = mu;
-    cov_arr(:,:,i+1) = cov;
-    obs_rank_arr(i+1) = rank(obsv(A,C));
+    if flags(5)
+        y = [m1_meas;m2_meas];
+        u = M;
+        mu = mu_arr(:,i);
+        cov = cov_arr(:,:,i);
+        [mu,cov,A,C] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,u,dt);
+        mu_arr(:,i+1) = mu;
+        cov_arr(:,:,i+1) = cov;
+        obs_rank_arr(i+1) = rank(obsv(A,C));
+    end
     
     % Step ECI position/velocity
     [~,rv_out] = ode45(@FODEint, t_prop, rv, options);
