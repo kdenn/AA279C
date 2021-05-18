@@ -44,7 +44,7 @@ rv_ECI_out(:,1) = [obj.ICs.r_ECI_0; obj.ICs.v_ECI_0];
 
 % EKF initialization
 dt = diff(t_arr(1:2));
-Q = 0.100*dt*eye(7);      % TODO: update process noise covariance
+Q = (1E-4)*dt*eye(7);      % TODO: update process noise covariance
 R_st = (deg2rad(40/3600))^2 * eye(3);
 R_imu = (1.7453E-4)^2 * eye(3);
 R = blkdiag(R_imu,R_st,R_st);
@@ -105,11 +105,10 @@ for i = 1:N-1
     
     % Onboard State Estimation
     if flags(5)
-        y = [m1_meas;m2_meas];
-        u = M;
+        y = [w_est;m1_meas;m2_meas];
         mu = mu_arr(:,i);
         cov = cov_arr(:,:,i);
-        [mu,cov,A,C,z_pre,z_post] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,u,dt);
+        [mu,cov,A,C,z_pre,z_post] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,zeros(3,1),dt);
         mu_arr(:,i+1) = mu;
         cov_arr(:,:,i+1) = cov;
         obs_rank_arr(i+1) = rank(obsv(A,C));
