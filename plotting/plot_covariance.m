@@ -16,7 +16,7 @@ figure(); set(gcf, 'Position',  [100, 100, 1200, 700]);
 for i = 1:Nd
     y = reshape(cov_arr(i,i,:),[N,1]);
     subplot(Nd,1,i); hold on; grid on;
-    plotFillRegion(x,y,-y,clrs(1,:))
+    plotFillRegion(x,y,-y,clrs(1,:),0.5)
     xlabel('Time (min)'); ylabel(['\Sigma_',num2str(i),' ',lbl]);
     ylim([-y_max y_max]);
 end

@@ -8,6 +8,7 @@ function plot_w_est_vs_w_true_diff(t_arr, w_true, w_est)
 
 % Seconds to minutes conversion
 t_arr = t_arr ./ 60;
+clrs = DefaultColors();
 
 % Resize so dimensions match
 if size(w_est,2) == (size(w_true,2)-1)
@@ -26,17 +27,17 @@ sqrt(sum(temp.^2));
 
 figure(); 
 subplot(3,1,1); hold on; grid on;
-plot(t_arr, w_diff(1,:), 'b');
+plot(t_arr, w_diff(1,:),'Color',clrs(1,:));
 xlabel('Time (min)'); ylabel('\omega_1 error');
 ylim([-y_max y_max]);
 
 subplot(3,1,2); hold on; grid on;
-plot(t_arr, w_diff(2,:), 'b');
+plot(t_arr, w_diff(2,:),'Color',clrs(1,:));
 xlabel('Time (min)'); ylabel('\omega_2 error');
 ylim([-y_max y_max]);
 
 subplot(3,1,3); hold on; grid on;
-plot(t_arr, w_diff(3,:), 'b');
+plot(t_arr, w_diff(3,:),'Color',clrs(1,:));
 xlabel('Time (min)'); ylabel('\omega_3 error');
 ylim([-y_max y_max]);
 

@@ -8,6 +8,7 @@ function plot_q_est_vs_q_true_diff(t_arr, q_true, q_est)
 
 % Seconds to minutes conversion
 t_arr = t_arr ./ 60;
+clrs = DefaultColors();
 
 % Resize so dimensions match
 if size(q_est,2) == (size(q_est,2)-1)
@@ -26,22 +27,22 @@ sqrt(sum(temp.^2));
 
 figure(); 
 subplot(4,1,1); hold on; grid on;
-plot(t_arr, q_diff(1,:), 'b');
+plot(t_arr, q_diff(1,:),'Color',clrs(1,:));
 xlabel('Time (min)'); ylabel('q_1 error');
 ylim([-y_max y_max]);
 
 subplot(4,1,2); hold on; grid on;
-plot(t_arr, q_diff(2,:), 'b');
+plot(t_arr, q_diff(2,:),'Color',clrs(1,:));
 xlabel('Time (min)'); ylabel('q_2 error');
 ylim([-y_max y_max]);
 
 subplot(4,1,3); hold on; grid on;
-plot(t_arr, q_diff(3,:), 'b');
+plot(t_arr, q_diff(3,:),'Color',clrs(1,:));
 xlabel('Time (min)'); ylabel('q_3 error');
 ylim([-y_max y_max]);
 
 subplot(4,1,4); hold on; grid on;
-plot(t_arr, q_diff(4,:), 'b');
+plot(t_arr, q_diff(4,:),'Color',clrs(1,:));
 xlabel('Time (min)'); ylabel('q_4 error');
 ylim([-y_max y_max]);
 end
