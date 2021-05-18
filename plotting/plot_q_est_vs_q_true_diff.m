@@ -1,4 +1,4 @@
-function plot_q_est_vs_q_true_diff(t_arr, q_true, q_est)
+function plot_q_est_vs_q_true_diff(t_arr, q_true, q_est, q_cov)
 % Purpose: Plot difference between estimated quaternion components and true 
 %          quaternion components (i.e. attitude estimation error)
 %
@@ -9,12 +9,14 @@ function plot_q_est_vs_q_true_diff(t_arr, q_true, q_est)
 % Seconds to minutes conversion
 t_arr = t_arr ./ 60;
 clrs = DefaultColors();
+q_cov = sqrt(abs(q_cov));
 
 % Resize so dimensions match
 if size(q_est,2) == (size(q_est,2)-1)
     t_arr = t_arr(1:end-1);
     q_true = q_true(:,1:end-1);
 end
+N = numel(t_arr);
 
 % Difference between the two
 q_diff = q_est - q_true;
@@ -26,23 +28,13 @@ temp = rad2deg(std(q_diff, 0, 2));
 sqrt(sum(temp.^2));
 
 figure(); 
-subplot(4,1,1); hold on; grid on;
-plot(t_arr, q_diff(1,:),'Color',clrs(1,:));
-xlabel('Time (min)'); ylabel('q_1 error');
-ylim([-y_max y_max]);
-
-subplot(4,1,2); hold on; grid on;
-plot(t_arr, q_diff(2,:),'Color',clrs(1,:));
-xlabel('Time (min)'); ylabel('q_2 error');
-ylim([-y_max y_max]);
-
-subplot(4,1,3); hold on; grid on;
-plot(t_arr, q_diff(3,:),'Color',clrs(1,:));
-xlabel('Time (min)'); ylabel('q_3 error');
-ylim([-y_max y_max]);
-
-subplot(4,1,4); hold on; grid on;
-plot(t_arr, q_diff(4,:),'Color',clrs(1,:));
-xlabel('Time (min)'); ylabel('q_4 error');
-ylim([-y_max y_max]);
+for i = 1:4
+    y = 3.*reshape(q_cov(i,i,:),[N,1]);
+    subplot(4,1,i); hold on; grid on;
+    plot(t_arr, q_diff(i,:),'Color',clrs(1,:));
+    plot(t_arr,y,'Color',clrs(2,:));
+    plot(t_arr,-y,'Color',clrs(2,:));
+    xlabel('Time (min)'); ylabel('q_2 error');
+    ylim([-y_max y_max]);
+end
 end
