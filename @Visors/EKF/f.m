@@ -21,4 +21,5 @@ x_tp1(1) = wx + (dt * (Mx - (Iz - Iy) * wy * wz) / Ix);
 x_tp1(2) = wy + (dt * (My - (Ix - Iz) * wz * wx) / Iy);
 x_tp1(3) = wz + (dt * (Mz - (Iy - Ix) * wx * wy) / Iz);
 x_tp1(4:7) = eye(4)*q_vec + 0.5.*dt.*( Omega * q_vec );
+x_tp1(4:7) = unitVec(x_tp1(4:7));
 end
