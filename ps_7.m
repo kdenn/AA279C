@@ -1,6 +1,7 @@
 % Kaitlin Dennison
 % Joshua Geiser
 clear all; close all; clc;
+clrs = DefaultColors();
 
 % Visors class
 s = visorsStruct();
@@ -29,6 +30,7 @@ std_err = sqrt(diag(R));
 
 %% 2.a State Transition Matrix
 % test with no env torques
+%{
 [omega_out, quat_out, rv_ECI_out, M_out] = vsrs.propagate(t_arr,[0,0,0,0,0]);
 mu = zeros(7,N);
 mu(:,1) = [w0;q0];
@@ -38,84 +40,21 @@ end
 
 plot_w_est_vs_w_true_diff(t_arr, omega_out, mu(1:3,:))
 plot_q_est_vs_q_true_diff(t_arr, quat_out, mu(4:end,:))
+%}
 
 %% 3 Test the Full EKF
-[omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = vsrs.propagate(t_arr);
+[omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = vsrs.propagate(t_arr,[0,0,0,0,1]);
 
+%% Plots
 plot_w_est_vs_w_true_diff(t_arr, omega_out, EKF_out.mu_arr(1:3,:))
 plot_q_est_vs_q_true_diff(t_arr, quat_out, EKF_out.mu_arr(4:end,:))
 
-% measurement residuals
-y_max = max(max(abs(w_diff)));
+plot_covariance(t_arr./60,EKF_out.cov_arr(1:3,1:3,:),'\omega')
+plot_covariance(t_arr./60,EKF_out.cov_arr(4:7,4:7,:),'q')
 
-% w measurement residuals
-figure(); 
-    subplot(3,1,1); hold on; grid on;
-    plot(t_arr, EKF_out.z_pre_out(1,:),'b','DisplayName','Pre');
-    plot(t_arr, EKF_out.z_post_out(1,:),'g','DisplayName','Post');
-    plot(t_arr([1,end]),[std_err(1),std_err(1)],'r','STD Error');
-    xlabel('Time (min)'); ylabel('Measurement Residuals');
-    ylim([-y_max y_max]);
-
-    subplot(3,1,2); hold on; grid on;
-    plot(t_arr, EKF_out.z_pre_out(2,:),'b','DisplayName','Pre');
-    plot(t_arr, EKF_out.z_post_out(2,:),'g','DisplayName','Post');
-    plot(t_arr([1,end]),[std_err(2),std_err(2)],'r','STD Error');
-    xlabel('Time (min)'); ylabel('Measurement Residuals');
-    ylim([-y_max y_max]);
-
-    subplot(3,1,3); hold on; grid on;
-    plot(t_arr, EKF_out.z_pre_out(3,:),'b','DisplayName','Pre');
-    plot(t_arr, EKF_out.z_post_out(3,:),'g','DisplayName','Post');
-    plot(t_arr([1,end]),[std_err(3),std_err(3)],'r','STD Error');
-    xlabel('Time (min)'); ylabel('Measurement Residuals');
-    ylim([-y_max y_max]);
-
-% m1 measurement residuals
-figure(); 
-    subplot(3,1,1); hold on; grid on;
-    plot(t_arr, EKF_out.z_pre_out(3+1,:),'b','DisplayName','Pre');
-    plot(t_arr, EKF_out.z_post_out(3+1,:),'g','DisplayName','Post');
-    plot(t_arr([1,end]),[std_err(3+1),std_err(3+1)],'r','STD Error');
-    xlabel('Time (min)'); ylabel('Measurement Residuals');
-    ylim([-y_max y_max]);
-
-    subplot(3,1,2); hold on; grid on;
-    plot(t_arr, EKF_out.z_pre_out(3+2,:),'b','DisplayName','Pre');
-    plot(t_arr, EKF_out.z_post_out(3+2,:),'g','DisplayName','Post');
-    plot(t_arr([1,end]),[std_err(3+2),std_err(3+2)],'r','STD Error');
-    xlabel('Time (min)'); ylabel('Measurement Residuals');
-    ylim([-y_max y_max]);
-
-    subplot(3,1,3); hold on; grid on;
-    plot(t_arr, EKF_out.z_pre_out(3+3,:),'b','DisplayName','Pre');
-    plot(t_arr, EKF_out.z_post_out(3+3,:),'g','DisplayName','Post');
-    plot(t_arr([1,end]),[std_err(3+3),std_err(3+3)],'r','STD Error');
-    xlabel('Time (min)'); ylabel('Measurement Residuals');
-    ylim([-y_max y_max]);
-
-% m2 measurement residuals
-figure(); 
-    subplot(3,1,1); hold on; grid on;
-    plot(t_arr, EKF_out.z_pre_out(6+1,:),'b','DisplayName','Pre');
-    plot(t_arr, EKF_out.z_post_out(6+1,:),'g','DisplayName','Post');
-    plot(t_arr([1,end]),[std_err(6+1),std_err(6+1)],'r','STD Error');
-    xlabel('Time (min)'); ylabel('Measurement Residuals');
-    ylim([-y_max y_max]);
-
-    subplot(3,1,2); hold on; grid on;
-    plot(t_arr, EKF_out.z_pre_out(6+2,:),'b','DisplayName','Pre');
-    plot(t_arr, EKF_out.z_post_out(6+2,:),'g','DisplayName','Post');
-    plot(t_arr([1,end]),[std_err(6+2),std_err(6+2)],'r','STD Error');
-    xlabel('Time (min)'); ylabel('Measurement Residuals');
-    ylim([-y_max y_max]);
-
-    subplot(3,1,3); hold on; grid on;
-    plot(t_arr, EKF_out.z_pre_out(6+3,:),'b','DisplayName','Pre');
-    plot(t_arr, EKF_out.z_post_out(6+3,:),'g','DisplayName','Post');
-    plot(t_arr([1,end]),[std_err(6+3),std_err(6+3)],'r','STD Error');
-    xlabel('Time (min)'); ylabel('Measurement Residuals');
-    ylim([-y_max y_max]);
+plot_residuals(t_arr./60,EKF_out.z_pre_arr(1:3,:)',EKF_out.z_post_arr(1:3,:)',std_err(1:3),'\omega_',' Residuals');
+plot_residuals(t_arr./60,EKF_out.z_pre_arr(4:6,:)',EKF_out.z_post_arr(4:6,:)',std_err(4:6),'m_{1,','} Residuals');
+plot_residuals(t_arr./60,EKF_out.z_pre_arr(7:9,:)',EKF_out.z_post_arr(7:9,:)',std_err(7:9),'m_{2,','} Residuals');
 
 
 
