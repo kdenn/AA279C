@@ -1,7 +1,7 @@
 function plot_residuals(x,z_pre,z_post,noise_thr,lbl_pre,lbl_post)
 
 clrs = DefaultColors();
-y_max = max([max(max(z_pre)),max(max(z_post))]);
+y_max = max([max(max(z_pre(10:end,:))),max(max(z_post(10:end,:)))]);
 
 figure(); set(gcf, 'Position',  [100, 100, 1200, 700]);
 for i = 1:numel(noise_thr)

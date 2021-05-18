@@ -12,7 +12,7 @@ function plot_est_vs_true(x,y_true,y_est,y_cov,lbl_pre,lbl_post)
     N = numel(x);
     Nd = size(y_true,1);
     y_diff = y_est - y_true;
-    y_max = max(max(abs(y_diff)));
+    y_max = max(max(abs(y_diff(:,10:end))));
 
     figure(); set(gcf, 'Position',  [100, 100, 1200, 700]);
     for i = 1:Nd

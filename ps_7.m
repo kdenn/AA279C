@@ -42,8 +42,35 @@ plot_w_est_vs_w_true_diff(t_arr, omega_out, mu(1:3,:))
 plot_q_est_vs_q_true_diff(t_arr, quat_out, mu(4:end,:))
 %}
 
+%% Get w and q noise caused by each perturbation
+%{
+[omega_out_base, quat_out_base, ~, ~, ~] = vsrs.propagate(t_arr,[0,0,0,0,0]);
+
+[omega_out_g, quat_out_g, ~, ~, ~] = vsrs.propagate(t_arr,[1,0,0,0,0]);
+dw = abs(omega_out_base-omega_out_g);
+dq = abs(quat_out_base-quat_out_g);
+noises.Qw_g = diag(std(dw,0,2).^2);
+noises.Qq_g = diag(std(dq,0,2).^2);
+[omega_out_s, quat_out_s, ~, ~, ~] = vsrs.propagate(t_arr,[0,1,0,0,0]);
+dw = abs(omega_out_base-omega_out_s);
+dq = abs(quat_out_base-quat_out_s);
+noises.Qw_s = diag(std(dw,0,2).^2);
+noises.Qq_s = diag(std(dq,0,2).^2);
+[omega_out_d, quat_out_d, ~, ~, ~] = vsrs.propagate(t_arr,[0,0,1,0,0]);
+dw = abs(omega_out_base-omega_out_d);
+dq = abs(quat_out_base-quat_out_d);
+noises.Qw_d = diag(std(dw,0,2).^2);
+noises.Qq_d = diag(std(dq,0,2).^2);
+[omega_out_m, quat_out_m, ~, ~, ~] = vsrs.propagate(t_arr,[0,0,0,1,0]);
+dw = abs(omega_out_base-omega_out_m);
+dq = abs(quat_out_base-quat_out_m);
+noises.Qw_m = diag(std(dw,0,2).^2);
+noises.Qq_m = diag(std(dq,0,2).^2);
+save('propagation/noises.mat','noises');
+%}
+ 
 %% 3 Test the Full EKF
-[omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = vsrs.propagate(t_arr,[0,0,0,0,1]);
+[omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = vsrs.propagate(t_arr,[1,0,0,0,1]);
 
 %% Plots
 plot_est_vs_true(t_arr./60,omega_out,EKF_out.mu_arr(1:3,:),EKF_out.cov_arr(1:3,1:3,:),'\omega_',[])
