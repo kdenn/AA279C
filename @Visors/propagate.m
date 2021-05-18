@@ -1,4 +1,4 @@
-function [omega_out, quat_out, rv_ECI_out, M_out, mu_arr, cov_arr, obs_rank_arr] = propagate(obj, t_arr, flags)
+function [omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = propagate(obj, t_arr, flags)
 % Propagate angular velocity and quaternion according to timesteps
 % contained in t_arr and with initial angular velcocity w0 and initial
 % quaternion q0
@@ -60,6 +60,8 @@ mu_arr(:,1) = mu;
 cov_arr = zeros(7,7,N);
 cov_arr(:,:,1) = cov;
 obs_rank_arr = zeros(1,N);
+z_pre_arr = zeros(9,N);
+z_post_arr = zeros(9,N);
 
 for i = 1:N-1
     % Current time 
@@ -107,10 +109,12 @@ for i = 1:N-1
         u = M;
         mu = mu_arr(:,i);
         cov = cov_arr(:,:,i);
-        [mu,cov,A,C] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,u,dt);
+        [mu,cov,A,C,z_pre,z_post] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,u,dt);
         mu_arr(:,i+1) = mu;
         cov_arr(:,:,i+1) = cov;
         obs_rank_arr(i+1) = rank(obsv(A,C));
+        z_pre_arr(:,i+1) = z_pre;
+        z_post_arr(:,i+1) = z_post;
     end
     
     % Step ECI position/velocity
@@ -130,5 +134,11 @@ obj.true.w = omega_out;
 obj.true.q = quat_out;
 obj.true.rv_ECI = rv_ECI_out;
 obj.true.M_env = M_out;
+
+EKF_out.mu_arr = mu_arr;
+EKF_out.cov_arr = cov_arr;
+EKF_out.obs_rank_arr = obs_rank_arr;
+EKF_out.z_pre_arr = z_pre_arr;
+EKF_out.z_post_arr = z_post_arr;
 
 end
