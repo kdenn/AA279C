@@ -10,8 +10,10 @@ function plot_q_est_vs_q_true_diff(t_arr, q_true, q_est)
 t_arr = t_arr ./ 60;
 
 % Resize so dimensions match
-t_arr = t_arr(1:end-1);
-q_true = q_true(:,1:end-1);
+if size(q_est,2) == (size(q_est,2)-1)
+    t_arr = t_arr(1:end-1);
+    q_true = q_true(:,1:end-1);
+end
 
 % Difference between the two
 q_diff = q_est - q_true;
