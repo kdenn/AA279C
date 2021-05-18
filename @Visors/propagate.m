@@ -110,6 +110,7 @@ for i = 1:N-1
         mu = mu_arr(:,i);
         cov = cov_arr(:,:,i);
         [mu,cov,A,C,z_pre,z_post] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,zeros(3,1),dt);
+        mu(4:7) = unitVec(mu(4:7));
         mu_arr(:,i+1) = mu;
         cov_arr(:,:,i+1) = cov;
         obs_rank_arr(i+1) = rank(obsv(A,C));

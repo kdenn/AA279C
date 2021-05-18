@@ -49,9 +49,6 @@ plot_q_est_vs_q_true_diff(t_arr, quat_out, mu(4:end,:))
 plot_est_vs_true(t_arr./60,omega_out,EKF_out.mu_arr(1:3,:),EKF_out.cov_arr(1:3,1:3,:),'\omega_',[])
 plot_est_vs_true(t_arr./60,quat_out,EKF_out.mu_arr(4:7,:),EKF_out.cov_arr(4:7,4:7,:),'q_',[])
 
-plot_covariance(t_arr./60,EKF_out.cov_arr(1:3,1:3,:),'\omega')
-plot_covariance(t_arr./60,EKF_out.cov_arr(4:7,4:7,:),'q')
-
 plot_residuals(t_arr./60,EKF_out.z_pre_arr(1:3,:)',EKF_out.z_post_arr(1:3,:)',std_err(1:3),'\omega_',' Residuals');
 plot_residuals(t_arr./60,EKF_out.z_pre_arr(4:6,:)',EKF_out.z_post_arr(4:6,:)',std_err(4:6),'m_{1,','} Residuals');
 plot_residuals(t_arr./60,EKF_out.z_pre_arr(7:9,:)',EKF_out.z_post_arr(7:9,:)',std_err(7:9),'m_{2,','} Residuals');
