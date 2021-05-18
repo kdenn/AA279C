@@ -44,16 +44,17 @@ rv_ECI_out(:,1) = [obj.ICs.r_ECI_0; obj.ICs.v_ECI_0];
 
 % EKF initialization
 dt = diff(t_arr(1:2));
-Q = (1E-4)*dt*eye(7);      % TODO: update process noise covariance
+Q = 0.1*dt*eye(7);      % TODO: update process noise covariance
 R_st = (deg2rad(40/3600))^2 * eye(3);
 R_imu = (1.7453E-4)^2 * eye(3);
 R = blkdiag(R_imu,R_st,R_st);
 
 [m1_meas, m2_meas, m1_true, m2_true] = obj.get_ref_vecs_meas(obj.q0);
-q_est = obj.opts.est_q(m1_meas, m2_meas, m1_true, m2_true);
-w_est = obj.get_w_meas(obj.w0);
-mu = [w_est;q_est]; 
-cov = blkdiag(R_imu,(deg2rad(40/3600))^2 * eye(4)); % TODO: check this?
+q0 = obj.q0 + 10*sqrtm((deg2rad(40/3600))^2 * eye(4))*randn(4,1);
+q0 = unitVec(q0);
+w0 = obj.w0 + 4*sqrtm(R_imu)*randn(3,1);
+mu = [w0;q0]; 
+cov = 10.*blkdiag(R_imu,(deg2rad(40/3600))^2 * eye(4)); % TODO: check this?
 
 mu_arr = zeros(7,N);
 mu_arr(:,1) = mu;
