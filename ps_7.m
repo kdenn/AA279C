@@ -43,11 +43,11 @@ plot_q_est_vs_q_true_diff(t_arr, quat_out, mu(4:end,:))
 %}
 
 %% 3 Test the Full EKF
-[omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = vsrs.propagate(t_arr,[1,1,1,1,1]);
+[omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = vsrs.propagate(t_arr,[0,0,0,0,1]);
 
 %% Plots
-plot_w_est_vs_w_true_diff(t_arr, omega_out, EKF_out.mu_arr(1:3,:))
-plot_q_est_vs_q_true_diff(t_arr, quat_out, EKF_out.mu_arr(4:end,:))
+plot_est_vs_true(t_arr./60,omega_out,EKF_out.mu_arr(1:3,:),EKF_out.cov_arr(1:3,1:3,:),'\omega_',[])
+plot_est_vs_true(t_arr./60,quat_out,EKF_out.mu_arr(4:7,:),EKF_out.cov_arr(4:7,4:7,:),'q_',[])
 
 plot_covariance(t_arr./60,EKF_out.cov_arr(1:3,1:3,:),'\omega')
 plot_covariance(t_arr./60,EKF_out.cov_arr(4:7,4:7,:),'q')
