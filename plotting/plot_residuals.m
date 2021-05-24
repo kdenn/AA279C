@@ -12,4 +12,5 @@ for i = 1:numel(noise_thr)
     plot(x([1,end]),-[noise_thr(i),noise_thr(i)],'Color',clrs(3,:));
     xlabel('Time (min)'); ylabel([lbl_pre,num2str(i),lbl_post]);
     ylim([-y_max y_max]);
+    legend('Pre','Post','1\sigma Meas')
 end

@@ -1,4 +1,4 @@
-function y = g(x, u, dt)
+function y = g(x)
 % Purpose: calculate y = g(x,u)
 
 % Renaming variables
@@ -18,7 +18,7 @@ Alp_meas = A_rot' * quat2dcm(q_vec) * Alp_ECI;
 % Expected output measurement vector (9x1)
 y = zeros(9,1);
 y(1) = wx;
-y(2) = wy; 
+y(2) = wy;
 y(3) = wz;
 y(4:6) = Sir_meas;
 y(7:9) = Alp_meas;

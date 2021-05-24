@@ -1,22 +1,23 @@
-function [mu, sig, At, Ct, z_pre, z_post] = EKFfilter(f_fun,A_fun,g_fun,C_fun,Q,R,mut,sigt,yt,ut,dt)
+function [x, P, At, Ht, z_pre, z_post] = EKFfilter(f_fun,A_fun,g_fun,H_fun,Q,R,xt,Pt,yt,ut,dt)
 % f: propagate x by dt
 % A: df/dx
 % g: measurement model: x -> y
-% C: dg/dx
+% H: dg/dx
+    N = numel(xt);
 
     % Predict
-    mup = f_fun(mut,ut,dt);
-    At = A_fun(mut,ut,dt);
-    sigp = At * (sigt * At') + Q;
-    
-    z_pre = g_fun(mup,ut,dt) - yt;
-    
+    At = A_fun(xt,ut,dt);
+    xp = At*xt;
+    Pp = At * (Pt * At') + Q;
+
+    z_pre = g_fun(xp) - yt;
+
     % Update
-    Ct = C_fun(mup,ut,dt);
-    Kt = sigp * Ct' * inv((Ct * sigp * Ct') + R);
-    mu = mup + (Kt * (yt-g_fun(mup,ut,dt)));
-    sig = sigp - (Kt * Ct * sigp);
-    
-    z_post = g_fun(mu,ut,dt) - yt;
-    
+    Ht = H_fun(xp,ut,dt);
+    Kt = Pp * Ht' * inv((Ht * Pp * Ht') + R);
+    x = xp + (Kt * (yt-g_fun(xp)));
+    P = (eye(N) - Kt*Ht)*Pp*(eye(N) - Kt*Ht)' + Kt*R*Kt';
+
+    z_post = g_fun(x) - yt;
+
 end

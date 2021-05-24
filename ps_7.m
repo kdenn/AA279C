@@ -20,7 +20,7 @@ N = numel(t_arr);
 % Options
 vsrs.opts.calc_q_det_flag = 0; % 1 if fictitious meas, 0 if normal meas
 vsrs.opts.corrupt_measurements = 1; % 1 if introducing noise to meas
-vsrs.opts.est_q = @vsrs.calc_q_stat; % deterministic or statistical?
+vsrs.opts.est_q = @vsrs.calc_q_stat; % q-method
 
 q_des = vsrs.calc_q_des(t_arr);
 R_st = (deg2rad(40/3600))^2 * eye(3);
@@ -41,6 +41,12 @@ end
 plot_w_est_vs_w_true_diff(t_arr, omega_out, mu(1:3,:))
 plot_q_est_vs_q_true_diff(t_arr, quat_out, mu(4:end,:))
 %}
+
+[omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = vsrs.propagate(t_arr,[0,0,0,0,0]);
+
+dq = quat_out(:,1:end-1) - vsrs.est.q;
+
+return
 
 %% Get w and q noise caused by each perturbation
 %{
@@ -70,7 +76,7 @@ save('propagation/noises.mat','noises');
 %}
  
 %% 3 Test the Full EKF
-[omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = vsrs.propagate(t_arr,[1,0,0,0,1]);
+[omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = vsrs.propagate(t_arr,[0,0,0,0,0]);
 
 %% Plots
 plot_est_vs_true(t_arr./60,omega_out,EKF_out.mu_arr(1:3,:),EKF_out.cov_arr(1:3,1:3,:),'\omega_',[])
