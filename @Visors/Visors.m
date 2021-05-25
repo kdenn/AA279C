@@ -61,6 +61,7 @@ classdef Visors < handle
             
             for i = 1:N
                 
+                % {
                 % Get current Sun direction in ECI frame
                 JD = obj.ICs.JD_epoch + (t_arr(i)/86400);
                 SUN_HAT_ECI = unitVec(get_sun_position(JD));
@@ -74,6 +75,15 @@ classdef Visors < handle
                 % Calculate desired quaternion such that body frame is
                 % aligned with Sun frame
                 quat = dcm2quat(obj.ICs.A_rot * DCM_ECI_TO_SUN);
+                %}
+                
+                %{
+                t = t_arr(i);
+                A = obj.ICs.A_rot;
+                A = R3(obj.ICs.n*t)*A;
+                quat = dcm2quat(A);
+                %}
+                
                 q_des(:,i) = quat;
             end
         end
