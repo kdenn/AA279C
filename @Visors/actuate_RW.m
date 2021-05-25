@@ -8,14 +8,6 @@ end
 L_dot_max = 0.0004; % (Nm)
 N = numel(M_des);
 
-if ~add_noise
-    M_act = M_des;
-    for i = 1:N
-        M_act(i) = sign(M_act(i))*min(L_dot_max,abs(M_act(i)));
-    end
-    return
-end
-
 % Get reaction wheel mounting matrix
 A = obj.A_RW;
 A_star = pinv(A);
@@ -23,23 +15,34 @@ A_star = pinv(A);
 % Command sent to actuator
 L_dot_cmd = A_star * M_des;
 
+if ~add_noise
+    L_dot_act = L_dot_cmd;
+    for i = 1:N
+        L_dot_act(i) = sign(L_dot_act(i))*min(L_dot_max,abs(L_dot_act(i)));
+    end
+    M_act = A *L_dot_act;
+    return
+end
+
 % Model Friction
 % Wertz 7.9
 N = numel(L_dot_cmd);
-r_wheel = 0.019/2;
-s_max = 60 * (0.015 / (0.130 * r_wheel)) / (2*pi*r_wheel); % rpm
+
+I = 0.0001147 * ones(4,1);
+w = L_dot_cmd./I;
+s = w./(2*pi); % rpm
+
 sn = sign(L_dot_cmd);
 
-X_min = 0; %0.125;
-X_dc = nan(N,1);
+L_dot_act = L_dot_cmd;
 for i = 1:N
-    X_dc(i) = min(1,max(X_min,abs(L_dot_cmd(i)/L_dot_max)));
+    L_dot_act(i) = min(L_dot_max,abs(L_dot_act(i)));
 end
-s = X_dc.*s_max;
-M_c = 7.06E-4; % Coulomb friction coefficient (Nm)
+
+M_c = 0; % Coulomb friction coefficient (Nm)
 f = 1.21E-6; % viscous friction coefficient (Nm/rpm)
-M_f = M_c + f.*s;
-M_out = X_dc.* L_dot_max - M_f;
+M_f = M_c + f.*abs(s);
+M_out = L_dot_act - M_f;
 for i = 1:N
     L_dot_out(i,1) = sn(i)*max(0,M_out(i));
 end
@@ -49,7 +52,7 @@ end
 % and V = 42x42x19 mm)
 I = 0.0001147 * ones(4,1);
 w0 = zeros(4,1);
-Q = 0.01^2 * eye(1);
+Q = 0.0005^2 * eye(1);
 w_dot_noise = sqrtm(Q)*randn(4,1);
 
 % Actual moment imparted on s/c
