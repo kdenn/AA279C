@@ -36,8 +36,8 @@ J_Alp = [(2 .*  q_mtx_1 * Alp_ECI)'; ...
          (2 .*  q_mtx_2 * Alp_ECI)'; ...
          (2 .*  q_mtx_3 * Alp_ECI)'];
      
-Since taking Jacobians with the additional rotation from principal to
-body axes makes everything more difficult
+% Since taking Jacobians with the additional rotation from principal to
+% body axes makes everything more difficult
 visorsInertia;
 DCM = A_rot'; % prin->body
 AA = DCM(1,1); BB = DCM(1,2); CC = DCM(1,3);
