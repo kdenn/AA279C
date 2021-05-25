@@ -1,4 +1,4 @@
-function [omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = propagate(obj, t_arr, flags)
+function [omega_out, quat_out, rv_ECI_out, M_out, EKF_out, omega_est, quat_est] = propagate(obj, t_arr, flags)
 % Propagate angular velocity and quaternion according to timesteps
 % contained in t_arr and with initial angular velcocity w0 and initial
 % quaternion q0
@@ -16,7 +16,9 @@ function [omega_out, quat_out, rv_ECI_out, M_out, EKF_out] = propagate(obj, t_ar
     % 2: solar radiation pressure
     % 3: drag
     % 4: magnetic field
-    % 5: EKF
+    % 5: EKF (1), q-method (2), or true state (0)
+    % 6: linear (1), nonlinear (2), or no control (0)
+    % 7: control noise
 if nargin == 2
     flags = ones(1,5);
 end
@@ -29,27 +31,33 @@ N = length(t_arr);
 
 % Output vars
 omega_out = zeros(3, N);
+omega_des = zeros(3, N);
+omega_est = zeros(3, N);
 quat_out = zeros(4, N);
+quat_des = zeros(4, N);
+quat_est = zeros(4, N);
 rv_ECI_out = zeros(6, N);
-M_out = zeros(3, N, 5);         % (:,:,1) = gravity gradient
+M_out = zeros(3, N, 7);         % (:,:,1) = gravity gradient
                                 % (:,:,2) = solar radiation pressure
                                 % (:,:,3) = drag
                                 % (:,:,4) = magnetic
-                                % (:,:,5) = sum of all
+                                % (:,:,5) = sum of all env
+                                % (:,:,6) = control desired
+                                % (:,:,7) = control actual
 
 % Append ICs to output arrays
 omega_out(:,1) = obj.w0; % Princ
 quat_out(:,1) = obj.q0; % ECI > Princ
 rv_ECI_out(:,1) = [obj.ICs.r_ECI_0; obj.ICs.v_ECI_0];
 
-% EKF initialization
+%% EKF initialization
 dt = diff(t_arr(1:2));
 load('propagation/noises.mat'); % noises
 Qw_p = flags(1).*10.*noises.Qw_g + flags(2).*noises.Qw_s + flags(3).*noises.Qw_d + flags(4).*noises.Qw_m;
 Qq_p = flags(1).*10.*noises.Qq_g + flags(2).*noises.Qq_s + flags(3).*noises.Qq_d + flags(4).*noises.Qq_m;
 Qb_w = 5e-3.*[1,1,1];
 Qb_q = 5e-2.*[1,1,1,1];
-Q = dt*(diag([Qb_w,Qb_q]) + blkdiag(Qw_p,Qq_p))
+Q = dt*(diag([Qb_w,Qb_q]) + blkdiag(Qw_p,Qq_p));
 R_st = (deg2rad(40/3600))^2 * eye(3);
 R_imu = (1.7453E-4)^2 * eye(3);
 R = blkdiag(R_imu,R_st,R_st);
@@ -59,7 +67,7 @@ R = blkdiag(R_imu,R_st,R_st);
 mu = [obj.w0;obj.q0] + 2*sqrtm(Q)*randn(7,1);
 mu(4:7) = unitVec(mu(4:7));
 mu
-cov = (1e3)*blkdiag(R_imu,(deg2rad(40/3600))^2 * eye(4))
+cov = (1e3)*blkdiag(R_imu,(deg2rad(40/3600))^2 * eye(4));
 
 mu_arr = zeros(7,N);
 mu_arr(:,1) = mu;
@@ -69,17 +77,18 @@ obs_rank_arr = zeros(1,N);
 z_pre_arr = zeros(9,N);
 z_post_arr = zeros(9,N);
 
+%% Begin Propagation
 for i = 1:N-1
     % Current time 
     t = t_arr(i);
+    t_prop = [t t_arr(i+1)];
+    dt = diff(t_prop);
     JD_curr = obj.ICs.JD_epoch + (t/86400); 
-    
-    % Values at current timestep 
     rv = rv_ECI_out(:,i);
     w = omega_out(:,i);
     q = quat_out(:,i);
     
-    % Get environmental torques
+    %% Get environmental torques
     env_torques = get_env_torques(obj.ICs, JD_curr, rv(1:3), rv(4:6), q, flags);
     M = env_torques.all;
     
@@ -90,12 +99,11 @@ for i = 1:N-1
     M_out(:,i+1,4) = env_torques.mag;
     M_out(:,i+1,5) = env_torques.all;
     
-    % Get reference direction measurements and calculate q
+    %% Get Estimates of q and w
+    % Direct estimate (non-filter) method
     [m1_meas, m2_meas, m1_true, m2_true] = obj.get_ref_vecs_meas(q);
     q_est = obj.opts.est_q(m1_meas, m2_meas, m1_true, m2_true);
     obj.est.q = [obj.est.q, q_est];
-    
-    % Get angular velocity measurements and calculate q
     w_est = obj.get_w_meas(w);
     if length(obj.est.q_from_w) == 0
         q_in = q;
@@ -105,33 +113,50 @@ for i = 1:N-1
     q_from_w = obj.calc_q_from_w(w_est, q_in, [t t_arr(i+1)], options);
     obj.est.q_from_w = [obj.est.q_from_w, q_from_w];
     
-    % For propagation to next timestep
-    t_prop = [t t_arr(i+1)];
-    dt = diff(t_prop);
-    
     % Onboard State Estimation
-    if flags(5)
-        y = [w_est;m1_meas;m2_meas];
-        mu = mu_arr(:,i);
-        cov = cov_arr(:,:,i);
-        [mu,cov,A,C,z_pre,z_post] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,zeros(3,1),dt);
-        mu(4:7) = unitVec(mu(4:7));
-        mu_arr(:,i+1) = mu;
-        cov_arr(:,:,i+1) = cov;
-        obs_rank_arr(i+1) = rank(obsv(A,C));
-        z_pre_arr(:,i+1) = z_pre;
-        z_post_arr(:,i+1) = z_post;
+    switch flags(5)
+        case 1
+            y = [w_est;m1_meas;m2_meas];
+            mu = mu_arr(:,i);
+            cov = cov_arr(:,:,i);
+            [mu_p,cov,A,C,z_pre,z_post] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,zeros(3,1),dt);
+            mu_p(4:7) = unitVec(mu_p(4:7));
+            mu_arr(:,i+1) = mu_p;
+            cov_arr(:,:,i+1) = cov;
+            obs_rank_arr(i+1) = rank(obsv(A,C));
+            z_pre_arr(:,i+1) = z_pre;
+            z_post_arr(:,i+1) = z_post;
+        case 2
+            mu = [w_est;q_est];
+        otherwise
+            mu = [w;q];
+    end
+    omega_est(:,i) = mu(1:3);
+    quat_est(:,i) = mu(4:7);
+    
+    %% Control
+    q_des = obj.calc_q_des(t);
+    quat_des(:,i) = q_des;
+    w_des = obj.w0;
+    omega_des(:,i) = w_des;
+    if mod(t,30) == 0 && i ~= 1
+        switch flags(6)
+            case 1
+                M_c_des = obj.linear_ctrl(q_des, mu(4:7), w_des, mu(1:3));
+                M_c_act = obj.actuate_RW(M_c_des,flags(7));
+            case 2
+                M_c_des = obj.nonlinear_ctrl(q_des, mu(4:7), w_des, mu(1:3));
+                M_c_act = obj.actuate_RW(M_c_des,flags(7));
+            otherwise
+                M_c_des = [0;0;0];
+                M_c_act = [0;0;0];
+        end
+        M_out(:,i+1,6) = M_c_des;
+        M_out(:,i+1,7) = M_c_act;
+        M = M + M_c_act;
     end
     
-    % Control
-    q_des = obj.calc_q_des(t);
-    q_est = q; % mu(4:7);
-    w_des = [0; 0; 0];
-    w_est = w; % mu(1:3);
-    M_c_des = obj.nonlinear_ctrl(q_des, q_est, w_des, w_est);
-    M_c_act = obj.actuate_RW(M_c_des);
-    M = M + M_c_act;
-    
+    %% Propagate Forward
     % Step ECI position/velocity
     [~,rv_out] = ode45(@FODEint, t_prop, rv, options);
     rv_ECI_out(:,i+1) = rv_out(end,:)';
@@ -144,11 +169,19 @@ for i = 1:N-1
     [~, q_out] = ode45(@(t,y) int_quaternion(t,y,w_out(end,:)'), t_prop, q, options);
     quat_out(:,i+1) = q_out(end,:)'./norm(q_out(end,:)');
 end
+q_des = obj.calc_q_des(t_arr(N));
+quat_des(:,N) = q_des;
+omega_des(:,N) = w_des;
+
+%% Storage
 
 obj.true.w = omega_out;
+obj.true.w_des = omega_des;
 obj.true.q = quat_out;
+obj.true.q_des = quat_des;
 obj.true.rv_ECI = rv_ECI_out;
-obj.true.M_env = M_out;
+obj.true.M_env = M_out(:,:,1:5);
+obj.true.M_ctl = M_out(:,:,6:7);
 
 EKF_out.mu_arr = mu_arr;
 EKF_out.cov_arr = cov_arr;
