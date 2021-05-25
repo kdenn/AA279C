@@ -1,16 +1,8 @@
 function M_act = actuate_RW(obj, L_dot_cmd)
 % Purpose: Reaction wheel actuator modeling with added Gaussian noise
 
-% Trisectrix
-% A = [1, 0, 0, 1/sqrt(3); ...
-%      0, 1, 0, 1/sqrt(3); ...
-%      0, 0, 1, 1/sqrt(3)];
- 
-% Pyramid
-A = (1/sqrt(3)) .* [-1, +1, +1, -1; ...
-                    -1, -1, +1, +1; ...
-                    +1, +1, +1, +1];
- 
+% Get reaction wheel mounting matrix
+A = obj.A_RW;
 A_star = pinv(A);
 
 % Command sent to actuator
@@ -21,7 +13,7 @@ L_dot_cmd = A_star * M_des;
 N = numel(L_dot_cmd);
 r_wheel = 0.019/2;
 s_max = 60 * (0.015 / (0.130 * r_wheel)) / r_wheel; % rpm
-L_dot_max = 0.0004; % (Nm) 
+L_dot_max = 0.0004; % (Nm)
 sn = sign(L_dot_cmd);
 
 X_dc = min(ones(N,1),max(0.125.*ones(N,1),L_dot_cmd./L_dot_max,2),2);

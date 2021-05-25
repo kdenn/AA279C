@@ -123,6 +123,15 @@ for i = 1:N-1
         z_post_arr(:,i+1) = z_post;
     end
     
+    % Control
+    q_des = obj.calc_q_des(t);
+    q_est = q; % mu(4:7);
+    w_des = [0; 0; 0];
+    w_est = w; % mu(1:3);
+    M_c_des = obj.nonlinear_ctrl(q_des, q_est, w_des, w_est);
+    M_c_act = obj.actuate_RW(M_c_des);
+    M = M + M_c_act;
+    
     % Step ECI position/velocity
     [~,rv_out] = ode45(@FODEint, t_prop, rv, options);
     rv_ECI_out(:,i+1) = rv_out(end,:)';
