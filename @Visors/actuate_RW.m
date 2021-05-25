@@ -1,16 +1,8 @@
 function M_act = actuate_RW(obj, M_des)
 % Purpose: Reaction wheel actuator modeling with added Gaussian noise
 
-% Trisectrix
-% A = [1, 0, 0, 1/sqrt(3); ...
-%      0, 1, 0, 1/sqrt(3); ...
-%      0, 0, 1, 1/sqrt(3)];
- 
-% Pyramid
-A = (1/sqrt(3)) .* [-1, +1, +1, -1; ...
-                    -1, -1, +1, +1; ...
-                    +1, +1, +1, +1];
- 
+% Get reaction wheel mounting matrix 
+A = obj.A_RW;
 A_star = pinv(A);
 
 % Each RW has an inertia of 0.0001147 kg-m^2 (calculated from m = 0.130 kg

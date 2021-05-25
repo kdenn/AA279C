@@ -15,6 +15,9 @@ classdef Visors < handle
         % spacecraft onboard computer
         est
         
+        % Reaction wheel mounting matrix
+        A_RW
+        
     end
     methods
         
@@ -37,6 +40,16 @@ classdef Visors < handle
             obj.est = struct();
             obj.est.q = [];
             obj.est.q_from_w = [];
+            
+            % Reaction wheel mounting matrix - pyramid
+            obj.A_RW = (1/sqrt(3)) .* [-1, +1, +1, -1; ...
+                                       -1, -1, +1, +1; ...
+                                       +1, +1, +1, +1];
+                                   
+%             % Reaction wheel mounting matrix - trisectrix
+%             obj.A_RW = [1, 0, 0, 1/sqrt(3); ...
+%                         0, 1, 0, 1/sqrt(3); ...
+%                         0, 0, 1, 1/sqrt(3)];
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
