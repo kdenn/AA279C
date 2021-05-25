@@ -14,9 +14,9 @@ w0 = zeros(4,1);
 L_dot_cmd = A_star * M_des;
 w_dot_cmd = (L_dot_cmd ./ I) + w0; 
 
-% 1-sigma noise of 0.01 rad/s for angular velocity
-Q = 0.01^2 * eye(1);
-w_dot_act = max(0, w_dot_cmd + sqrtm(Q)*randn(4,1));
+% 1-sigma noise of sqrt(Q) rad/s for angular velocity
+Q = 0^2;
+w_dot_act = max(0, w_dot_cmd + sqrt(Q)*randn(4,1));
 
 % Actual moment imparted on s/c
 L_dot_act = I .* (w0 + w_dot_act);
