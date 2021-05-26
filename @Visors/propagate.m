@@ -1,4 +1,4 @@
-function [omega_out, quat_out, rv_ECI_out, M_out, EKF_out, omega_est, quat_est] = propagate(obj, t_arr, flags)
+function [omega_true, quat_true, rv_ECI_out, M_out, EKF_out, states] = propagate(obj, t_arr, flags)
 % Propagate angular velocity and quaternion according to timesteps
 % contained in t_arr and with initial angular velcocity w0 and initial
 % quaternion q0
@@ -30,10 +30,10 @@ options = odeset('RelTol', 1e-9, 'AbsTol', 1e-9);
 N = length(t_arr);
 
 % Output vars
-omega_out = zeros(3, N);
+omega_true = zeros(3, N);
 omega_des = zeros(3, N);
 omega_est = zeros(3, N);
-quat_out = zeros(4, N);
+quat_true = zeros(4, N);
 quat_des = zeros(4, N);
 quat_est = zeros(4, N);
 rv_ECI_out = zeros(6, N);
@@ -46,8 +46,8 @@ M_out = zeros(3, N, 7);         % (:,:,1) = gravity gradient
                                 % (:,:,7) = control actual
 
 % Append ICs to output arrays
-omega_out(:,1) = obj.w0; % Princ
-quat_out(:,1) = obj.q0; % ECI > Princ
+omega_true(:,1) = obj.w0; % Princ
+quat_true(:,1) = obj.q0; % ECI > Princ
 rv_ECI_out(:,1) = [obj.ICs.r_ECI_0; obj.ICs.v_ECI_0];
 
 %% EKF initialization
@@ -85,8 +85,8 @@ for i = 1:N-1
     dt = diff(t_prop);
     JD_curr = obj.ICs.JD_epoch + (t/86400); 
     rv = rv_ECI_out(:,i);
-    w = omega_out(:,i);
-    q = quat_out(:,i);
+    w = omega_true(:,i);
+    q = quat_true(:,i);
     
     %% Get environmental torques
     env_torques = get_env_torques(obj.ICs, JD_curr, rv(1:3), rv(4:6), q, flags);
@@ -143,10 +143,10 @@ for i = 1:N-1
         switch flags(6)
             case 1
                 M_c_des = obj.linear_ctrl(q_des, mu(4:7), w_des, mu(1:3));
-                M_c_act = obj.actuate_RW(M_c_des,flags(7));
+                M_c_act = obj.actuate_RW(M_c_des,w,dt,flags(7));
             case 2
                 M_c_des = obj.nonlinear_ctrl(q_des, mu(4:7), w_des, mu(1:3));
-                M_c_act = obj.actuate_RW(M_c_des,flags(7));
+                M_c_act = obj.actuate_RW(M_c_des,w,dt,flags(7));
             otherwise
                 M_c_des = [0;0;0];
                 M_c_act = [0;0;0];
@@ -163,25 +163,36 @@ for i = 1:N-1
     
     % Step angular velocity (Euler propagates in princ)
     [~, w_out] = ode45(@(t,y) int_Euler_eqs(t,y,obj.ICs.I_princ,M), t_prop, w, options);
-    omega_out(:,i+1) = w_out(end,:)';
+    omega_true(:,i+1) = w_out(end,:)';
     
     % Step quaternion
     [~, q_out] = ode45(@(t,y) int_quaternion(t,y,w_out(end,:)'), t_prop, q, options);
-    quat_out(:,i+1) = q_out(end,:)'./norm(q_out(end,:)');
+    quat_true(:,i+1) = q_out(end,:)'./norm(q_out(end,:)');
 end
 q_des = obj.calc_q_des(t_arr(N));
 quat_des(:,N) = q_des;
 omega_des(:,N) = w_des;
+quat_est(:,N) = quat_est(:,N-1);
+omega_est(:,N) = omega_est(:,N-1);
 
 %% Storage
 
-obj.true.w = omega_out;
+obj.true.w = omega_true;
 obj.true.w_des = omega_des;
-obj.true.q = quat_out;
+obj.true.w_est = omega_est;
+obj.true.q = quat_true;
 obj.true.q_des = quat_des;
+obj.true.q_est = quat_est;
 obj.true.rv_ECI = rv_ECI_out;
 obj.true.M_env = M_out(:,:,1:5);
 obj.true.M_ctl = M_out(:,:,6:7);
+
+states.w_true = omega_true;
+states.w_des = omega_des;
+states.w_est = omega_est;
+states.q_true = quat_true;
+states.q_des = quat_des;
+states.q_est = quat_est;
 
 EKF_out.mu_arr = mu_arr;
 EKF_out.cov_arr = cov_arr;
