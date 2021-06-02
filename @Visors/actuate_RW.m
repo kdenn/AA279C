@@ -21,8 +21,19 @@ if ~add_noise
         L_dot_act(i) = sign(L_dot_act(i))*min(L_dot_max,abs(L_dot_act(i)));
     end
     M_act = A *L_dot_act;
+%     M_act = M_des;
     return
 end
+
+Q = (10^(-5))^2 * eye(1);
+w_dot_noise = sqrtm(Q)*randn(4,1);
+
+% Actual moment imparted on s/c
+I = 0.0001147 * ones(4,1);
+L_dot_noise = I .* w_dot_noise;
+M_act = A * (L_dot_cmd + L_dot_noise);
+
+%{
 
 % Model Friction
 % Wertz 7.9
@@ -54,4 +65,6 @@ w_dot_noise = sqrtm(Q)*randn(4,1);
 % Actual moment imparted on s/c
 L_dot_noise = I .* w_dot_noise .* (L_dot_out~=0);
 M_act = A * (L_dot_out + L_dot_noise);
+
+%}
 end
