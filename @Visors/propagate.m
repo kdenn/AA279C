@@ -87,6 +87,7 @@ for i = 1:N-1
     rv = rv_ECI_out(:,i);
     w = omega_true(:,i);
     q = quat_true(:,i);
+    u = M_out(:,i,7);
     
     %% Get environmental torques
     env_torques = get_env_torques(obj.ICs, JD_curr, rv(1:3), rv(4:6), q, flags);
@@ -119,7 +120,7 @@ for i = 1:N-1
             y = [w_est;m1_meas;m2_meas];
             mu = mu_arr(:,i);
             cov = cov_arr(:,:,i);
-            [mu_p,cov,A,C,z_pre,z_post] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,zeros(3,1),dt);
+            [mu_p,cov,A,C,z_pre,z_post] = EKFfilter(@f,@get_A,@g,@get_C,Q,R,mu,cov,y,u,dt);
             mu_p(4:7) = unitVec(mu_p(4:7));
             mu_arr(:,i+1) = mu_p;
             cov_arr(:,:,i+1) = cov;
@@ -139,7 +140,7 @@ for i = 1:N-1
     quat_des(:,i) = q_des;
     w_des = obj.w0;
     omega_des(:,i) = w_des;
-    if mod(t,30) == 0 && i ~= 1
+    if i > 10 % && mod(t,30) == 0
         switch flags(6)
             case 1
                 M_c_des = obj.linear_ctrl(q_des, mu(4:7), w_des, mu(1:3));
