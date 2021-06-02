@@ -9,11 +9,11 @@ w0 = deg2rad([0;0;0]);
 q0 = dcm2quat(s.A_rot);
 
 % Sim time parameters
-t0 = 0; dt = 1; tf = 60*10; t_arr = (t0:dt:tf)'; N = numel(t_arr);
+t0 = 0; dt = 10; tf = 60*60; t_arr = (t0:dt:tf)'; N = numel(t_arr);
 t_min = t_arr./60;
 
 % flags: 
-flags = [0,1,1,1,1,1,1];
+flags = [1,1,1,1,1,2,1];
     % 1: gravity gradient
     % 2: solar radiation pressure
     % 3: drag
@@ -29,7 +29,7 @@ vsrs.opts.corrupt_measurements = 1; % 1 if introducing noise to meas
 vsrs.opts.est_q = @vsrs.calc_q_stat; % deterministic or statistical?
 [omega_out, quat_out, rv_ECI_out, M_out, EKF_out, states] = vsrs.propagate(t_arr,flags);
 
-% plot_attitude_3D(vsrs.ICs, quat_out);
+plot_attitude_3D(vsrs.ICs, quat_out);
 
 %% Plots
 plt_rng = 5:(N-2);
