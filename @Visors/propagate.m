@@ -1,4 +1,4 @@
-function [omega_true, quat_true, rv_ECI_out, M_out, EKF_out, states] = propagate(obj, t_arr, flags)
+function [omega_true, quat_true, rv_ECI_out, M_out, EKF_out, states, L_dot] = propagate(obj, t_arr, flags)
 % Propagate angular velocity and quaternion according to timesteps
 % contained in t_arr and with initial angular velcocity w0 and initial
 % quaternion q0
@@ -44,7 +44,8 @@ M_out = zeros(3, N, 7);         % (:,:,1) = gravity gradient
                                 % (:,:,5) = sum of all env
                                 % (:,:,6) = control desired
                                 % (:,:,7) = control actual
-
+L_dot = zeros(4,N,2);
+                                
 % Append ICs to output arrays
 omega_true(:,1) = obj.w0; % Princ
 quat_true(:,1) = obj.q0; % ECI > Princ
@@ -144,10 +145,14 @@ for i = 1:N-1
         switch flags(6)
             case 1
                 M_c_des = obj.linear_ctrl(q_des, mu(4:7), w_des, mu(1:3));
-                M_c_act = obj.actuate_RW(M_c_des,w,dt,flags(7));
+                [M_c_act,L_dot_act,L_dot_cmd] = obj.actuate_RW(M_c_des,w,dt,flags(7));
+                L_dot(:,i+1,1) = L_dot_act;
+                L_dot(:,i+1,2) = L_dot_cmd;
             case 2
                 M_c_des = obj.nonlinear_ctrl(q_des, mu(4:7), w_des, mu(1:3));
-                M_c_act = obj.actuate_RW(M_c_des,w,dt,flags(7));
+                [M_c_act,L_dot_act,L_dot_cmd] = obj.actuate_RW(M_c_des,w,dt,flags(7));
+                L_dot(:,i+1,1) = L_dot_act;
+                L_dot(:,i+1,2) = L_dot_cmd;
             otherwise
                 M_c_des = [0;0;0];
                 M_c_act = [0;0;0];

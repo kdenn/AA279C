@@ -1,4 +1,4 @@
-function M_act = actuate_RW(obj, M_des, w_sc, dt, add_noise)
+function [M_act,L_dot_act,L_dot_cmd] = actuate_RW(obj, M_des, w_sc, dt, add_noise)
 % Purpose: Reaction wheel actuator modeling with added Gaussian noise
 
 if ~exist('add_noise','var')
@@ -31,6 +31,7 @@ w_dot_noise = sqrtm(Q)*randn(4,1);
 % Actual moment imparted on s/c
 I = 0.0001147 * ones(4,1);
 L_dot_noise = I .* w_dot_noise;
+L_dot_act = L_dot_cmd + L_dot_noise;
 M_act = A * (L_dot_cmd + L_dot_noise);
 
 %{
